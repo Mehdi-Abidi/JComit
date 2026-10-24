@@ -39,6 +39,39 @@ docker compose exec app python scripts/check_tokenfactory.py
 docker compose exec app python scripts/check_egress.py
 ```
 
+## NVIDIA OpenShell sandbox (GitHub Codespaces)
+
+The agent runs inside an [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell) sandbox with the policy in [openshell/jcomit-policy.yaml](openshell/jcomit-policy.yaml):
+
+- Only Python may reach the model API, and only `POST /v1/chat/completions` and `GET /v1/models`. Any other host, path or program is denied.
+- The API key is attached as an OpenShell provider. Code inside the sandbox only sees a placeholder; OpenShell injects the real key at the network boundary.
+- Every allowed and denied connection is logged with a reason (`openshell logs jcomit`).
+
+Setup in a Codespace (Ubuntu 22.04, see [.devcontainer](.devcontainer)):
+
+```bash
+# Install NemoClaw + OpenShell (onboarding deferred)
+curl -fsSL https://www.nvidia.com/nemoclaw.sh | \
+  NEMOCLAW_NON_INTERACTIVE=1 NEMOCLAW_ACCEPT_THIRD_PARTY_SOFTWARE=1 \
+  NEMOCLAW_AGENT=hermes NEMOCLAW_DEFER_ONBOARDING=1 bash
+export PATH="$HOME/.local/bin:$PATH"
+
+# Codespaces has no systemd, so start the gateway by hand and register it
+bash openshell/start-gateway.sh
+openshell gateway add --local --name local https://127.0.0.1:17670
+
+# Create the sandbox and attach the model key as a provider
+openshell sandbox create --name jcomit --policy openshell/jcomit-policy.yaml --detach
+NVIDIA_API_KEY=... openshell provider create --name nvidia --type nvidia --credential NVIDIA_API_KEY
+openshell sandbox provider attach jcomit nvidia
+
+# Checks
+openshell sandbox upload jcomit scripts/check_openshell_egress.py /tmp/
+openshell sandbox exec -n jcomit --no-tty -- python3 /tmp/check_openshell_egress.py
+```
+
+`nemoclaw onboard` itself needs systemd to supervise the gateway, so it does not complete inside Codespaces.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).

@@ -27,7 +27,8 @@ def main() -> int:
     print(f"Key visible inside sandbox: {KEY[:12]}... (length {len(KEY)})")
     models = sorted(m["id"] for m in call("/models")["data"] if "nemotron" in m["id"].lower())
     print("Nemotron models:", *models, sep="\n  ")
-    model = os.environ.get("MODEL") or next((m for m in models if "super" in m), models[0])
+    # Free endpoint on build.nvidia.com; the Super/Ultra models 404 on free accounts.
+    model = os.environ.get("MODEL", "nvidia/nemotron-3.5-lightning-30b-a3b")
     out = call("/chat/completions", {
         "model": model,
         "messages": [{"role": "user", "content": "Say hello in one short sentence."}],

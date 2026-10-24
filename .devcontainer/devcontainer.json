@@ -4,7 +4,8 @@
   "features": {
     "ghcr.io/devcontainers/features/python:1": { "version": "3.12" },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/sshd:1": {}
   },
   "postCreateCommand": "pip install -r requirements.txt",
   "containerEnv": { "PYTHONPATH": "/workspaces/JComit/src" }

@@ -1,0 +1,35 @@
+# JComit sandbox.
+# The app container sits on an internal network with no route to the internet.
+# Its only way out is the egress proxy, which allows Nebius Token Factory and
+# denies everything else. Every allowed and denied request lands in logs/egress.log.
+
+networks:
+  sandbox:
+    internal: true
+  outside: {}
+
+services:
+  egress:
+    build: ./egress
+    container_name: jcomit-egress
+    networks: [sandbox, outside]
+    volumes:
+      - ./egress/allowlist.txt:/etc/tinyproxy/allowlist.txt:ro
+      - ./logs:/var/log/tinyproxy
+
+  app:
+    build: .
+    container_name: jcomit-app
+    networks: [sandbox]
+    depends_on: [egress]
+    env_file: .env
+    environment:
+      HTTPS_PROXY: http://egress:8888
+      HTTP_PROXY: http://egress:8888
+      NO_PROXY: localhost,127.0.0.1
+    volumes:
+      - ./data:/app/data
+      - ./scripts:/app/scripts:ro
+      - ./src:/app/src:ro
+    working_dir: /app
+    command: ["sleep", "infinity"]

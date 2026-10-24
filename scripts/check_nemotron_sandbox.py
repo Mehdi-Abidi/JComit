@@ -9,8 +9,14 @@ import os
 import sys
 import urllib.request
 
-BASE = os.environ.get("MODEL_BASE_URL", "https://integrate.api.nvidia.com/v1")
-KEY = os.environ.get("NVIDIA_API_KEY", "")
+# Nebius Token Factory is the main provider; NVIDIA's free endpoint is the backup.
+if os.environ.get("NEBIUS_API_KEY"):
+    BASE, KEY = "https://api.tokenfactory.nebius.com/v1", os.environ["NEBIUS_API_KEY"]
+    DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b"
+else:
+    BASE, KEY = "https://integrate.api.nvidia.com/v1", os.environ.get("NVIDIA_API_KEY", "")
+    # Free endpoint on build.nvidia.com; the Super/Ultra models 404 on free accounts.
+    DEFAULT_MODEL = "nvidia/nemotron-3.5-lightning-30b-a3b"
 
 
 def call(path: str, body: dict | None = None) -> dict:
@@ -27,8 +33,8 @@ def main() -> int:
     print(f"Key visible inside sandbox: {KEY[:12]}... (length {len(KEY)})")
     models = sorted(m["id"] for m in call("/models")["data"] if "nemotron" in m["id"].lower())
     print("Nemotron models:", *models, sep="\n  ")
-    # Free endpoint on build.nvidia.com; the Super/Ultra models 404 on free accounts.
-    model = os.environ.get("MODEL", "nvidia/nemotron-3.5-lightning-30b-a3b")
+    model = os.environ.get("MODEL", DEFAULT_MODEL)
+    print(f"Endpoint: {BASE}")
     out = call("/chat/completions", {
         "model": model,
         "messages": [{"role": "user", "content": "Say hello in one short sentence."}],

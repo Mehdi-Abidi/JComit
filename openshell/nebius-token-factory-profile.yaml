@@ -1,6 +1,6 @@
 # OpenShell provider profile for Nebius Token Factory (OpenAI-compatible API).
 # The real key stays with the gateway; the sandbox only sees a placeholder.
-#   openshell provider profile import openshell/nebius-token-factory-profile.yaml
+#   openshell provider profile import --file openshell/nebius-token-factory-profile.yaml
 #   NEBIUS_API_KEY=... openshell provider create --name nebius --type nebius-token-factory --credential NEBIUS_API_KEY
 #   openshell sandbox provider attach jcomit nebius
 

@@ -1,0 +1,13 @@
+BEST BUY #123
+Austin TX | 2026-09-14
+
+Customer: Sara Ahmed
+Email: sara.ahmed@example.com
+Phone: (512) 555-0142
+Deliver to: 1207 Rainey St Apt 5B, Austin TX 78701
+
+  4K monitor 32in                1899.00
+
+  TOTAL                          1899.00
+
+Paid with card ending 5521

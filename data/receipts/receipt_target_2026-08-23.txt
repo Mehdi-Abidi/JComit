@@ -1,0 +1,13 @@
+TARGET #00023
+Austin TX | 2026-08-23
+
+Customer: Sara Ahmed
+Email: sara.ahmed@example.com
+Phone: (512) 555-0142
+Deliver to: 1207 Rainey St Apt 5B, Austin TX 78701
+
+  Home goods                       58.10
+
+  TOTAL                            58.10
+
+Paid with card ending 5521

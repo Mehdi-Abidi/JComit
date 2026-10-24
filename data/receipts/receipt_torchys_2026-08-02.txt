@@ -1,0 +1,14 @@
+TORCHYS TACOS
+Austin TX | 2026-08-02
+
+Customer: Sara Ahmed
+Email: sara.ahmed@example.com
+Phone: (512) 555-0142
+Deliver to: 1207 Rainey St Apt 5B, Austin TX 78701
+
+  Tacos x3                         21.50
+  Queso                             6.25
+
+  TOTAL                            27.75
+
+Paid with card ending 5521

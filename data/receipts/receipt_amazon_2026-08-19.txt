@@ -1,0 +1,13 @@
+AMAZON.COM
+Order #111-2204518-7731 | 2026-08-19
+
+Customer: Sara Ahmed
+Email: sara.ahmed@example.com
+Phone: (512) 555-0142
+Deliver to: 1207 Rainey St Apt 5B, Austin TX 78701
+
+  USB-C hub, 7-port                84.37
+
+  TOTAL                            84.37
+
+Paid with card ending 5521

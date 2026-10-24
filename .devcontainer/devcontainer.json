@@ -1,7 +1,8 @@
 {
   "name": "JComit",
-  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
   "features": {
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12" },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/node:1": { "version": "22" }
   },

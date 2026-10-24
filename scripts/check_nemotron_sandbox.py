@@ -38,9 +38,11 @@ def main() -> int:
     out = call("/chat/completions", {
         "model": model,
         "messages": [{"role": "user", "content": "Say hello in one short sentence."}],
-        "max_tokens": 300,
+        "max_tokens": 2000,
     })
-    print(f"\nModel: {model}\nReply: {out['choices'][0]['message']['content']}")
+    choice = out["choices"][0]
+    print(f"\nModel: {model}\nReply: {choice['message']['content']!r}"
+          f" (finish: {choice['finish_reason']}, tokens: {out['usage']['total_tokens']})")
     return 0
 
 

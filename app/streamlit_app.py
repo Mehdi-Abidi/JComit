@@ -1,4 +1,4 @@
-"""JComit page: what we hide, results, action log. Run: streamlit run app/streamlit_app.py
+"""JComit page. Run: streamlit run app/streamlit_app.py
 
 Results come from data/ when the skills have run next to this page (live), and
 from demo/ otherwise: a snapshot of a real run inside the OpenShell sandbox.
@@ -16,15 +16,20 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from jcomit import statement  # noqa: E402
 from jcomit.categorize import default_redactor  # noqa: E402
+from jcomit.skills import SKILLS  # noqa: E402
 
-st.set_page_config(page_title="JComit", page_icon="🔒", layout="wide")
+st.set_page_config(page_title="JComit", page_icon=":material/lock:", layout="wide")
+
+ALERT_LABELS = {"large": "Very large charge", "double": "Charged twice", "new_abroad": "New shop abroad"}
 
 
-def results_dir() -> tuple[Path, str]:
+# --- data -------------------------------------------------------------------------
+
+def results_dir() -> tuple[Path, bool]:
     live = ROOT / "data"
     if (live / "categorized.json").exists() and (live / "review_latest.json").exists():
-        return live, "live results from data/"
-    return ROOT / "demo", "snapshot of a real run inside the OpenShell sandbox (demo/)"
+        return live, True
+    return ROOT / "demo", False
 
 
 def load_json(folder: Path, name: str, default):
@@ -32,8 +37,8 @@ def load_json(folder: Path, name: str, default):
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
 
 
-def money(x: float) -> str:
-    return f"{'-' if x < 0 else ''}${abs(x):,.2f}"
+def money(x: float, cents: bool = True) -> str:
+    return f"{'-' if x < 0 else ''}${abs(x):,.{2 if cents else 0}f}"
 
 
 def esc(text: str) -> str:
@@ -41,46 +46,137 @@ def esc(text: str) -> str:
     return text.replace("$", "\\$")
 
 
-folder, source = results_dir()
+def is_routine(e: dict) -> bool:
+    """Allowed model calls: expected, and they bury the interesting events."""
+    return e["result"] == "allowed" and "tokenfactory" in e.get("target", "")
+
+
+folder, live = results_dir()
 categorized = load_json(folder, "categorized.json", {"items": [], "sent_to_model": []})
 review = load_json(folder, "review_latest.json", {})
 log = load_json(folder, "action_log.json", None) or load_json(ROOT / "docs", "sample_action_log.json", [])
 
 txns = statement.load(ROOT / "data" / "statement.csv")
 redact = default_redactor(txns)
+stopped = [e for e in log if e["result"] in ("denied", "blocked")]
+subs = review.get("subscriptions", [])
+alerts = review.get("alerts", [])
+month = review.get("month", "")
 
-st.title("JComit: private finance agent")
-st.caption(
-    "Private details are hidden before anything leaves the machine. The agent runs in an NVIDIA "
-    "OpenShell sandbox that can reach Nebius Token Factory (Nemotron 3 Super) and nothing else. "
-    f"All data is fake. Showing: {source}."
+# --- header -----------------------------------------------------------------------
+
+st.title("JComit")
+st.markdown("##### Your money, sorted by an AI that never learns who you are.")
+st.markdown(
+    ":green-badge[:material/memory: Nemotron 3 Super on Nebius Token Factory] "
+    ":blue-badge[:material/shield: NVIDIA OpenShell sandbox] "
+    ":gray-badge[:material/science: All data is fake]"
 )
 
-hide, results, actions = st.columns([1.1, 1.2, 1])
+k1, k2, k3, k4 = st.columns(4)
+k1.metric(f"Spent in {month}", money(review.get("spending_total", 0), cents=False), border=True)
+k2.metric("Subscriptions", f"{money(-sum(s['amount'] for s in subs))}/mo", border=True)
+k3.metric("Alerts", len(alerts), border=True)
+k4.metric("Stopped by the sandbox", len(stopped), border=True)
 
-# --- 1. What we hide ------------------------------------------------------------
-with hide:
-    st.subheader("1. What we hide")
+money_tab, privacy_tab, sandbox_tab = st.tabs([
+    ":material/bar_chart: Money review",
+    ":material/visibility_off: Privacy",
+    ":material/shield: Sandbox",
+])
+
+# --- money review -----------------------------------------------------------------
+
+with money_tab:
+    left, right = st.columns([5, 4], gap="large")
+    with left:
+        with st.container(border=True):
+            st.markdown("**Nemotron's review**")
+            st.markdown(esc(review.get("review", "No review yet.")))
+            st.caption("Only category totals, subscriptions and alerts were sent to the model.")
+        if alerts:
+            st.markdown("**Worth a look**")
+            for a in alerts:
+                st.markdown(esc(
+                    f":orange[:material/warning:] **{ALERT_LABELS.get(a['type'], a['type'])}**: "
+                    f"{a['merchant']}, {money(-a['amount'])} on {a['date']}"
+                ))
+    with right:
+        spend = review.get("spending_by_category", {})
+        if spend:
+            st.markdown(f"**Where the money went in {month}**")
+            st.altair_chart(
+                alt.Chart(alt.Data(values=[{"category": k, "spent": v} for k, v in spend.items()]))
+                .mark_bar(cornerRadiusEnd=3, color="#76B900")
+                .encode(
+                    x=alt.X("spent:Q", title=None, axis=alt.Axis(format="$,.0f")),
+                    y=alt.Y("category:N", sort="-x", title=None),
+                    tooltip=["category:N", alt.Tooltip("spent:Q", format="$,.2f")],
+                )
+                .properties(height=26 * len(spend) + 20),
+                use_container_width=True,
+            )
+
+    if subs:
+        total = -sum(s["amount"] for s in subs)
+        st.markdown(esc(f"**Subscriptions** · {money(total)} a month, {money(total * 12)} a year"))
+        st.dataframe(
+            [{"Shop": s["merchant"], "Monthly": money(-s["amount"])} for s in subs],
+            hide_index=True, use_container_width=True,
+        )
+
+    items = categorized["items"]
+    if items:
+        decided = Counter(i["source"] for i in items)
+        with st.expander(f"All {len(items)} transactions · " + ", ".join(f"{v} by {k}" for k, v in decided.most_common())):
+            st.dataframe(
+                [{"Date": i["date"], "Shop": i["description"], "Amount": i["amount"],
+                  "Category": i["category"], "Decided by": i["source"]} for i in items],
+                hide_index=True, use_container_width=True,
+                column_config={"Amount": st.column_config.NumberColumn(format="$%.2f")},
+            )
+
+# --- privacy ----------------------------------------------------------------------
+
+with privacy_tab:
+    steps = st.columns(4)
+    for col, (title, text) in zip(steps, [
+        ("1. Your statement", "Stays on this machine."),
+        ("2. Redaction", "Names, accounts, cards, emails, phones and addresses become labels."),
+        ("3. Leak guard", "Refuses to send anything that still holds a private value."),
+        ("4. Nemotron", "Sees labels and shop names only."),
+    ]):
+        with col.container(border=True):
+            st.markdown(f"**{title}**")
+            st.caption(text)
+
     rows_tab, receipts_tab, model_tab, try_tab = st.tabs(["Statement", "Receipts", "What Nemotron saw", "Try it"])
 
-    with rows_tab:
-        def full_row(t):
-            card = f" · card {t.card_last4}" if t.card_last4 else ""
-            return f"{t.description} · {t.account_holder} · {t.account_number}{card}"
+    receipts = sorted((ROOT / "data" / "receipts").glob("*.txt"))
+    for p in receipts:  # so their emails, phones and addresses appear in the label table
+        redact(p.read_text(encoding="utf-8"))
 
-        # Rows with private details in the description first: they show the most.
-        seen, examples = set(), []
-        for t in sorted(txns, key=lambda t: redact(t.description) == t.description):
-            if t.description not in seen:
-                seen.add(t.description)
-                examples.append(t)
-        st.caption("Every row carries the holder's name and account number. None of it reaches the model.")
-        st.table([{"raw": full_row(t), "after redaction": redact(full_row(t))} for t in examples[:12]])
+    with rows_tab:
+        changed = []
+        for t in txns:
+            red = redact(t.description)
+            if red != t.description and t.description not in {c["Raw"] for c in changed}:
+                changed.append({"Raw": t.description, "After redaction": red})
+        a, b = st.columns([2, 3], gap="large")
+        with a:
+            st.markdown("**Private values and their labels**")
+            st.dataframe(
+                [{"Label": k, "Real value (stays here)": v} for k, v in sorted(redact.mapping.items())],
+                hide_index=True, use_container_width=True,
+            )
+        with b:
+            st.markdown("**Rows that mention people or accounts**")
+            st.dataframe(changed, hide_index=True, use_container_width=True)
+            st.caption("Every row also carries the holder's name, account and card. They are replaced the same way.")
 
     with receipts_tab:
-        receipts = sorted((ROOT / "data" / "receipts").glob("*.txt"))
         if receipts:
-            pick = st.selectbox("Receipt", receipts, format_func=lambda p: p.stem.replace("receipt_", ""))
+            pick = st.selectbox("Receipt", receipts, format_func=lambda p: p.stem.replace("receipt_", "").replace("_", " "))
             raw = pick.read_text(encoding="utf-8")
             a, b = st.columns(2)
             a.caption("Raw")
@@ -89,78 +185,62 @@ with hide:
             b.code(redact(raw), language=None)
 
     with model_tab:
-        st.caption(
-            "Rules sort the common shops. Only the shops they don't know go to Nemotron, "
-            "after redaction and a final leak check."
-        )
+        st.caption("Rules sort the common shops. Only the ones they don't know go to Nemotron, once each.")
         st.dataframe(
-            [{"original": s["original"], "sent to Nemotron": s["redacted"]} for s in categorized["sent_to_model"]],
+            [{"Original": s["original"], "Sent to Nemotron": s["redacted"]} for s in categorized["sent_to_model"]],
             hide_index=True, use_container_width=True,
         )
 
     with try_tab:
-        text = st.text_area("Type or paste anything", "Zelle payment to Omar Khan from Sara Ahmed, acct 4421-9987, card ending 5521")
+        text = st.text_area("Type or paste anything",
+                            "Zelle payment to Omar Khan from Sara Ahmed, acct 4421-9987, card ending 5521")
         st.code(redact(text), language=None)
 
-# --- 2. Results -----------------------------------------------------------------
-with results:
-    month = review.get("month", "")
-    st.subheader(f"2. Results{f' for {month}' if month else ''}")
-    if review:
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Income", money(review["income"]))
-        m2.metric("Spent", money(review["spending_total"]))
-        m3.metric("Difference", money(review["income"] - review["spending_total"]))
+# --- sandbox ----------------------------------------------------------------------
 
-        st.info(esc(f"**Nemotron's review.** {review['review']}"))
-
-        spend = review["spending_by_category"]
-        st.altair_chart(
-            alt.Chart(alt.Data(values=[{"category": k, "spent": v} for k, v in spend.items()]))
-            .mark_bar()
-            .encode(
-                x=alt.X("spent:Q", title="Spent ($)"),
-                y=alt.Y("category:N", sort="-x", title=None),
-                tooltip=["category:N", alt.Tooltip("spent:Q", format="$,.2f")],
-            )
-            .properties(height=28 * len(spend) + 40),
-            use_container_width=True,
+with sandbox_tab:
+    left, right = st.columns([1, 1], gap="large")
+    with left:
+        st.markdown("**What each skill may reach**")
+        st.dataframe(
+            [{"Skill": s.name,
+              "Status": "Approved" if s.approved else "Not approved",
+              "Network": ", ".join(f"{a.method} {a.host}{a.path}" for a in s.network)}
+             for s in SKILLS.values()],
+            hide_index=True, use_container_width=True,
         )
+        st.caption("The sandbox policy is generated from these declarations. "
+                   "Files: code is read-only, only data/ is writable.")
+    with right:
+        st.markdown("**One policy line, live**")
+        shares = [e for e in log if e.get("skill") == "share_report"][-3:]
+        cards = st.columns(max(len(shares), 1))
+        for col, (e, label) in zip(cards, zip(shares, ["Default policy", "share_report approved", "Approval removed"])):
+            ok = e["result"] == "sent"
+            with col.container(border=True):
+                st.caption(label)
+                st.markdown(f":{'green' if ok else 'red'}[**{'Sent' if ok else 'Blocked'}**]")
+                st.caption(e.get("detail", ""))
 
-        subs = review.get("subscriptions", [])
-        if subs:
-            total = sum(-s["amount"] for s in subs)
-            st.markdown(esc(f"**Subscriptions:** {money(total)} a month, {money(total * 12)} a year"))
-            st.table([{"shop": s["merchant"], "monthly": money(-s["amount"])} for s in subs])
+    st.markdown("**Action log**")
+    show_routine = st.toggle("Show routine model calls", value=False)
+    shown = [e for e in reversed(log) if show_routine or not is_routine(e)]
+    st.dataframe(
+        [{
+            "Time": e["time"][11:19],
+            "Result": e["result"].upper(),
+            "Who": e.get("skill") or e.get("program") or e["source"],
+            "What": e.get("action") or e.get("target") or "",
+            "Why": e.get("reason") or e.get("detail") or (f"policy {e['policy']}" if e.get("policy") else ""),
+        } for e in shown],
+        hide_index=True, use_container_width=True,
+        column_config={"Result": st.column_config.TextColumn(width="small"),
+                       "Time": st.column_config.TextColumn(width="small")},
+    )
 
-        labels = {"large": "Very large charge", "double": "Charged twice", "new_abroad": "New shop abroad"}
-        for a in review.get("alerts", []):
-            st.warning(esc(f"**{labels.get(a['type'], a['type'])}:** {a['merchant']}, "
-                           f"{money(-a['amount'])} on {a['date']}"))
-
-    items = categorized["items"]
-    if items:
-        decided = Counter(i["source"] for i in items)
-        st.caption("Who decided each category: " + ", ".join(f"{k} {v}" for k, v in decided.most_common()))
-        with st.expander(f"All {len(items)} transactions"):
-            st.dataframe(
-                [{"date": i["date"], "shop": i["description"], "amount": i["amount"],
-                  "category": i["category"], "decided by": i["source"]} for i in items],
-                hide_index=True, use_container_width=True,
-            )
-
-# --- 3. Action log --------------------------------------------------------------
-with actions:
-    st.subheader("3. Action log")
-    bad = sum(1 for e in log if e["result"] in ("denied", "blocked"))
-    st.caption(f"{len(log)} events, {bad} blocked or denied, newest first. "
-               "Green: allowed. Red: stopped by the sandbox.")
-    with st.container(height=760):
-        for e in reversed(log):
-            who = e.get("skill") or e.get("program") or ""
-            what = e.get("action") or e.get("target") or ""
-            why = e.get("reason") or e.get("detail") or (f"policy: {e['policy']}" if e.get("policy") else "")
-            line = f"`{e['time'][11:19]}` **{e['result'].upper()}** {e['source']} {who}  \n{what}"
-            if why:
-                line += f"  \n_{why}_"
-            (st.error if e["result"] in ("denied", "blocked") else st.success)(esc(line))
+st.divider()
+st.caption(
+    ("Live results from this machine." if live else
+     "Results are a snapshot of a real run inside the NVIDIA OpenShell sandbox.")
+    + " Source: [github.com/Mehdi-Abidi/JComit](https://github.com/Mehdi-Abidi/JComit)"
+)

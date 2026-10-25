@@ -86,6 +86,7 @@ def default_redactor(txns: list[Transaction] = ()) -> Redact | None:
         out = r.redact(text)
         return out[0] if isinstance(out, tuple) else out
 
+    redact.mapping = r.mapping  # label -> original, for showing on this machine only
     return redact
 
 

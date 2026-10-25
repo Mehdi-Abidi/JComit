@@ -17,7 +17,7 @@ from .memory import DEFAULT_PATH, Memory
 
 def cmd_categorize(args, memory: Memory) -> int:
     txns = statement.load(*args.files)
-    redact = None if args.no_ai else default_redactor()
+    redact = None if args.no_ai else default_redactor(txns)
     if not args.no_ai and redact is None:
         print("Note: redact.py is not available, so nothing is sent to Nemotron (fail closed).\n")
     result = categorize(txns, memory=memory, redact=redact, use_ai=not args.no_ai)

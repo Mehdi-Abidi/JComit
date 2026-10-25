@@ -6,6 +6,7 @@ from demo/ otherwise: a snapshot of a real run inside the OpenShell sandbox.
 import json
 import sys
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import altair as alt
@@ -62,6 +63,7 @@ stopped = [e for e in log if e["result"] in ("denied", "blocked")]
 subs = review.get("subscriptions", [])
 alerts = review.get("alerts", [])
 month = review.get("month", "")
+month_name = datetime.strptime(month, "%Y-%m").strftime("%B %Y") if month else ""
 
 # --- header -----------------------------------------------------------------------
 
@@ -74,7 +76,7 @@ st.markdown(
 )
 
 k1, k2, k3, k4 = st.columns(4)
-k1.metric(f"Spent in {month}", money(review.get("spending_total", 0), cents=False), border=True)
+k1.metric(f"Spent in {month_name}", money(review.get("spending_total", 0), cents=False), border=True)
 k2.metric("Subscriptions", f"{money(-sum(s['amount'] for s in subs))}/mo", border=True)
 k3.metric("Alerts", len(alerts), border=True)
 k4.metric("Stopped by the sandbox", len(stopped), border=True)
@@ -104,7 +106,7 @@ with money_tab:
     with right:
         spend = review.get("spending_by_category", {})
         if spend:
-            st.markdown(f"**Where the money went in {month}**")
+            st.markdown(f"**Where the money went in {month_name}**")
             st.altair_chart(
                 alt.Chart(alt.Data(values=[{"category": k, "spent": v} for k, v in spend.items()]))
                 .mark_bar(cornerRadiusEnd=3, color="#76B900")
@@ -116,14 +118,13 @@ with money_tab:
                 .properties(height=26 * len(spend) + 20),
                 use_container_width=True,
             )
-
-    if subs:
-        total = -sum(s["amount"] for s in subs)
-        st.markdown(esc(f"**Subscriptions** · {money(total)} a month, {money(total * 12)} a year"))
-        st.dataframe(
-            [{"Shop": s["merchant"], "Monthly": money(-s["amount"])} for s in subs],
-            hide_index=True, use_container_width=True,
-        )
+        if subs:
+            total = -sum(s["amount"] for s in subs)
+            st.markdown(esc(f"**Subscriptions** · {money(total)} a month, {money(total * 12)} a year"))
+            st.dataframe(
+                [{"Shop": s["merchant"], "Monthly": money(-s["amount"])} for s in subs],
+                hide_index=True, use_container_width=True,
+            )
 
     items = categorized["items"]
     if items:
@@ -165,8 +166,15 @@ with privacy_tab:
         a, b = st.columns([2, 3], gap="large")
         with a:
             st.markdown("**Private values and their labels**")
+            kinds = ["NAME", "ACCT", "CARD", "EMAIL", "PHONE", "ADDRESS"]
+
+            def label_order(label: str):
+                kind, _, n = label.strip("[]").rpartition("_")
+                return (kinds.index(kind) if kind in kinds else len(kinds), int(n) if n.isdigit() else 0)
+
             st.dataframe(
-                [{"Label": k, "Real value (stays here)": v} for k, v in sorted(redact.mapping.items())],
+                [{"Label": k, "Real value (stays here)": redact.mapping[k]}
+                 for k in sorted(redact.mapping, key=label_order)],
                 hide_index=True, use_container_width=True,
             )
         with b:
@@ -219,7 +227,8 @@ with sandbox_tab:
             ok = e["result"] == "sent"
             with col.container(border=True):
                 st.caption(label)
-                st.markdown(f":{'green' if ok else 'red'}[**{'Sent' if ok else 'Blocked'}**]")
+                st.markdown(":green[:material/check_circle: **Sent**]" if ok
+                            else ":red[:material/block: **Blocked**]")
                 st.caption(e.get("detail", ""))
 
     st.markdown("**Action log**")
@@ -228,7 +237,7 @@ with sandbox_tab:
     st.dataframe(
         [{
             "Time": e["time"][11:19],
-            "Result": e["result"].upper(),
+            "Result": ("🔴 " if e["result"] in ("denied", "blocked") else "🟢 ") + e["result"].upper(),
             "Who": e.get("skill") or e.get("program") or e["source"],
             "What": e.get("action") or e.get("target") or "",
             "Why": e.get("reason") or e.get("detail") or (f"policy {e['policy']}" if e.get("policy") else ""),

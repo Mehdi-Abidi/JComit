@@ -6,6 +6,17 @@ Built for the Nebius x NVIDIA Global AI Hackathon 2026, Personal AI track.
 
 > Work in progress. All data in this repo is synthetic.
 
+## Use it
+
+```bash
+python -m pytest                                              # unit tests, no network
+PYTHONPATH=src python -m jcomit.cli categorize data/statement.csv --show-sent
+PYTHONPATH=src python -m jcomit.cli correct "SQ *BLUE DOOR LLC" Dining
+PYTHONPATH=src python -m jcomit.cli memory                     # corrections survive restarts
+```
+
+Categories come from the user's saved corrections first, then simple rules, then Nemotron 3 Super on Nebius Token Factory for the merchants the rules don't know. Only redacted text reaches the model, and a guard refuses any payload that still contains the account holder's name, account number or card number. How the modules fit together: [docs/interfaces.md](docs/interfaces.md).
+
 ## How the sandbox works
 
 ```

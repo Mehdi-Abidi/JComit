@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from jcomit.categorize import categorize, parse_answer, rule_category
+from jcomit.categorize import categorize, default_redactor, parse_answer, rule_category
 from jcomit.memory import Memory
 from jcomit.statement import Transaction
 
@@ -96,3 +96,12 @@ def test_parse_answer_ignores_unknown_ids_and_categories():
         "1": "Dining", "2": "Other",
     }
     assert parse_answer("no json here", ["1"]) == {}
+
+
+def test_holder_name_in_a_description_is_hidden_not_blocked():
+    txns = [txn("SQ *BLUE DOOR LLC FOR SARA AHMED"), txn("TERRA TOYS AUSTIN TX")]
+    model = FakeModel('{"1": "Dining", "2": "Shopping"}')
+    result = categorize(txns, redact=default_redactor(txns), ask=model)
+    assert result.blocked is None
+    assert "SARA" not in model.prompts[0].upper()
+    assert [i.category for i in result.items] == ["Dining", "Shopping"]

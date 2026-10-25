@@ -66,13 +66,16 @@ def rule_category(description: str) -> str | None:
     return next((c for p, c in RULES if p.search(d)), None)
 
 
-def default_redactor() -> Redact | None:
-    """Ali's redact.py, if it is there. Without it, nothing is sent to the model."""
+def default_redactor(txns: list[Transaction] = ()) -> Redact | None:
+    """Ali's redact.py, if it is there. Without it, nothing is sent to the model.
+
+    The statement's own holder, account and card values are hidden wherever they appear.
+    """
     try:
         from .redact import Redactor
     except ImportError:
         return None
-    r = Redactor()
+    r = Redactor(known=sorted({v for t in txns for v in (t.account_holder, t.account_number, t.card_last4)}))
 
     def redact(text: str) -> str:
         out = r.redact(text)

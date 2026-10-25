@@ -96,3 +96,76 @@ def test_statement_columns_are_hidden_with_known_values():
     assert r.redact(rows[0]["account_holder"]) == "[NAME_1]"
     assert r.redact(rows[0]["account_number"]) == "[ACCT_1]"
     assert r.redact("5521") == "[CARD_1]"
+
+
+KNOWN = ["Sara Ahmed", "4421 9987", "5521"]
+
+
+@pytest.mark.parametrize("text, leaks", [
+    ("ZELLE TO MARY ANN SMITH", ["SMITH", "ANN"]),
+    ("ZELLE TO JOSÉ MUÑOZ", ["JOS", "MU"]),
+    ("ZELLE TO O'BRIEN-SMITH PAT", ["BRIEN", "PAT"]),
+    ("ZELLE PAYMENT TO OMAR KHAN", ["KHAN"]),
+    ("PAYMENT TO OMAR KHAN", ["KHAN"]),
+    ("VENMO PAYMENT OMAR KHAN", ["KHAN"]),
+    ("zelle to omar khan", ["khan"]),
+    ("Name: Dr. Omar Khan", ["Khan"]),
+    ("AHMED, SARA", ["AHMED", "SARA"]),
+    ("AHMED/SARA", ["AHMED", "SARA"]),
+    ("Sara\nAhmed", ["Ahmed"]),
+    ("S. AHMED", ["AHMED"]),
+    ("ACCT 4421  9987", ["9987"]),
+    ("ACCT 4421 - 9987", ["9987"]),
+    ("ACCT 4421.9987", ["9987"]),
+    ("ACCT 4421_9987", ["9987"]),
+    ("ACCT 44219987", ["9987"]),
+    ("ACCT ４４２１ ９９８７", ["９９８７"]),
+    ("TO 7781 4421 9987 0012", ["9987", "0012"]),
+    ("card 4111 111111 11111", ["111111"]),
+    ("card 3782 822463 10005", ["822463"]),
+    ("card xxxx-xxxx-xxxx-5521", ["5521"]),
+    ("card ************5521", ["5521"]),
+    ("5521", ["5521"]),
+    ("CARD 5521 DECLINED", ["5521"]),
+    ("SARA.AHMED+bank@EXAMPLE.CO.UK", ["AHMED", "example"]),
+    ("+1 512 555 0142", ["0142"]),
+    ("512.555.0142", ["0142"]),
+    ("+44 20 7946 0958", ["0958"]),
+    ("1207 N Lamar Blvd Austin TX", ["Lamar"]),
+    ("PO Box 4412 Austin TX 78701", ["4412"]),
+])
+def test_attacks_do_not_leak(text, leaks):
+    out = Redactor(known=KNOWN).redact(text)
+    assert not [s for s in leaks if s.lower() in out.lower()], out
+
+
+@pytest.mark.parametrize("text", [
+    "DEARBORN MI GAS STATION",            # contains the cue word "dear"
+    "ZELLE",
+    "TRANSFER TO SAVINGS",
+])
+def test_cue_words_alone_do_not_eat_text(text):
+    assert Redactor().redact(text) == text
+
+
+def test_redacting_twice_changes_nothing():
+    r = Redactor(known=KNOWN)
+    once = r.redact("ZELLE TO OMAR KHAN 4421 9987 a@b.com")
+    assert r.redact(once) == once
+
+
+def test_spellings_of_a_known_value_share_one_label():
+    r = Redactor(known=KNOWN)
+    assert r.redact("Sara Ahmed / AHMED, SARA / S. AHMED") == "[NAME_1] / [NAME_1] / [NAME_1]"
+    assert r.redact("4421 9987 and 4421.9987") == "[ACCT_1] and [ACCT_1]"
+
+
+def test_huge_input_is_fast():
+    import time
+    start = time.time()
+    Redactor().redact("ZELLE TO " + "A " * 50000 + "12 " + "Aaaa " * 20000)
+    assert time.time() - start < 2
+
+
+def test_junk_known_values_are_ignored():
+    assert Redactor(known=["-", ",", "", " "]).redact("NETFLIX 15.49") == "NETFLIX 15.49"

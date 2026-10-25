@@ -75,7 +75,7 @@ def _write(name: str, payload: dict) -> Path:
 
 def run_categorize(args) -> dict:
     txns = _load(args.files)
-    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor())
+    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor(txns))
     sources = Counter(i.source for i in result.items)
     _write("categorized.json", {
         "items": [
@@ -111,7 +111,7 @@ def _finders():
 def run_monthly_review(args, ask=None) -> dict:
     txns = _load(args.files)
     month = args.month or max(t.date for t in txns).strftime("%Y-%m")
-    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor())
+    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor(txns))
     in_month = [i for i in result.items if i.txn.date.strftime("%Y-%m") == month]
 
     spend = Counter()

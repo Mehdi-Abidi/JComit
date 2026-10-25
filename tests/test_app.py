@@ -7,7 +7,7 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 
 
 def test_page_renders_demo_snapshot():
-    at = AppTest.from_file("app/streamlit_app.py", default_timeout=30).run()
+    at = AppTest.from_file("../app/streamlit_app.py", default_timeout=30).run()
     assert not at.exception
     assert any("Nemotron's review" in i.value for i in at.info)
     assert len(at.warning) == 3  # large, double, new abroad

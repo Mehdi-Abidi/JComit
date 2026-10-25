@@ -10,13 +10,13 @@ All values are fake. `redact.py` must replace each one with a label before anyth
 | `Omar Khan` | `ZELLE TO OMAR KHAN` | `[NAME_2]` |
 | `Hina Raza` | `ZELLE FROM HINA RAZA` | `[NAME_3]` |
 | `4421 9987` | `account_number` column (every row), `TRANSFER TO SAVINGS ACCT 4421 9987 0012` | `[ACCT_1]` |
-| `4421 9987 0012` | the savings transfer description (a longer account number that starts with the one above) | `[ACCT_2]` |
+| `4421 9987 0012` | the savings transfer description (a longer account number that starts with the one above) | `[ACCT_n]` |
 | `5521` (card last 4) | `card_last4` column, "card ending 5521" in receipts | `[CARD_1]` |
 | `sara.ahmed@example.com` | receipts | `[EMAIL_1]` |
 | `(512) 555-0142` | receipts | `[PHONE_1]` |
 | `1207 Rainey St Apt 5B, Austin TX 78701` | receipts, "Deliver to" line | `[ADDRESS_1]` |
 
-Same value, same label, everywhere. Names appear in any case and with spaces or dashes inside account numbers (Day 3 tests).
+Same value, same label, everywhere. Numbers in labels follow first appearance in the run, so `[NAME_1]` is whoever shows up first. Names appear in any case and with spaces or dashes inside account numbers (Day 3 tests).
 
 ## Must stay visible
 

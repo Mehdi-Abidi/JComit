@@ -53,10 +53,22 @@ Memory().correct("SQ *BLUE DOOR LLC", "Dining")   # saved in data/memory.db, sur
 
 Command line: `python -m jcomit.cli categorize data/statement.csv --show-sent`, `python -m jcomit.cli correct "<description>" <Category>`, `python -m jcomit.cli memory`.
 
+## Mehdi: skills, policy and action log (Day 3, done)
+
+Skills run inside the sandbox and write their outputs to `data/`:
+
+| Skill | Output in `data/` | Network it declares |
+|---|---|---|
+| `categorize` | `categorized.json`: items + `sent_to_model` (raw vs redacted) | Token Factory |
+| `monthly_review` | `review_<month>.json`, `review_latest.json`: totals, subscriptions, alerts, Nemotron's review | Token Factory |
+| `share_report` | nothing; the "bad" upload, not approved by default | example.com |
+
+Every run appends to `data/actions.jsonl`. `python -m jcomit.actionlog -o data/action_log.json` merges that with OpenShell's allowed/denied decisions into one list sorted by time. Each event has `time`, `source` ("skill" or "sandbox"), `result` ("ok", "sent", "blocked", "allowed", "denied"), and then `skill`/`action`/`detail` or `program`/`target`/`policy`/`reason`. A real one: [sample_action_log.json](sample_action_log.json).
+
 ## Taha: the Streamlit page
 
 Call the functions above; don't reimplement them. The three panels map to:
 
-1. Raw vs redacted: `result.sent` (and `Redactor` on the full statement)
-2. Results: `result.items`, `find_subscriptions`, `find_alerts`
-3. Action log: allowed and denied calls from `openshell logs jcomit` (Day 3)
+1. Raw vs redacted: `categorized.json` → `sent_to_model` (and `Redactor` on the full statement)
+2. Results: `categorized.json` → `items`, `review_latest.json` (totals, subscriptions, alerts, review text)
+3. Action log: `action_log.json`. Build against [sample_action_log.json](sample_action_log.json) until the page runs next to the sandbox. Colour `denied`/`blocked` red and `allowed`/`sent`/`ok` green.

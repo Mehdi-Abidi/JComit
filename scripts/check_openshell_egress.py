@@ -8,7 +8,6 @@ import urllib.error
 import urllib.request
 
 CASES = [
-    ("allow", "https://integrate.api.nvidia.com/v1/models"),
     ("allow", "https://api.tokenfactory.nebius.com/v1/models"),
     ("deny", "https://webhook.site/"),
     ("deny", "https://example.com/"),

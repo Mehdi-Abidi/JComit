@@ -50,6 +50,29 @@ docker compose exec app python scripts/check_tokenfactory.py
 docker compose exec app python scripts/check_egress.py
 ```
 
+## Skills and the sandbox policy
+
+The agent's tools are skills ([src/jcomit/skills.py](src/jcomit/skills.py)). Each declares the network access it needs, and the OpenShell policy is generated from those declarations ([src/jcomit/policy.py](src/jcomit/policy.py)), so a skill reaches only what it declared and the user approved:
+
+| Skill | Approved | Declares |
+|---|---|---|
+| `categorize` | yes | `POST api.tokenfactory.nebius.com/v1/chat/completions` |
+| `monthly_review` | yes | `POST api.tokenfactory.nebius.com/v1/chat/completions` |
+| `share_report` | no | `POST example.com/upload` |
+
+The code is baked into the sandbox image read-only at `/app`; only `/sandbox/data` is writable.
+
+```bash
+bash scripts/sandbox_up.sh              # build image, generate policy, attach Token Factory key, upload fake data
+scripts/skill.sh categorize
+scripts/skill.sh monthly_review --month 2026-09
+bash scripts/check_sandbox_rules.sh     # file and network rules + the blocked upload 10 times
+bash scripts/demo_policy_flip.sh        # share_report: blocked -> approve -> sent -> revoke -> blocked
+PYTHONPATH=src python3 -m jcomit.actionlog -o data/action_log.json
+```
+
+We originally planned OpenClaw skills, but `nemoclaw onboard` needs systemd, which Codespaces lacks (see below). The skills are plain Python run inside the same NVIDIA OpenShell sandbox and policy engine.
+
 ## NVIDIA OpenShell sandbox (GitHub Codespaces)
 
 The agent runs inside an [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell) sandbox with the policy in [openshell/jcomit-policy.yaml](openshell/jcomit-policy.yaml):

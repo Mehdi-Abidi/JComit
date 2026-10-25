@@ -1,0 +1,317 @@
+[
+  {
+    "time": "2026-10-25T07:59:32+00:00",
+    "source": "sandbox",
+    "result": "allowed",
+    "policy": "nebius_token_factory",
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "api.tokenfactory.nebius.com:443"
+  },
+  {
+    "time": "2026-10-25T07:59:32+00:00",
+    "source": "skill",
+    "skill": "categorize",
+    "action": "sorted 145 transactions",
+    "result": "ok",
+    "decided_by": {
+      "rule": 128,
+      "unreviewed": 17
+    },
+    "sent_to_model": 0
+  },
+  {
+    "time": "2026-10-25T07:59:33+00:00",
+    "source": "sandbox",
+    "result": "allowed",
+    "policy": "nebius_token_factory",
+    "kind": "request",
+    "target": "POST api.tokenfactory.nebius.com/v1/chat/completions"
+  },
+  {
+    "time": "2026-10-25T07:59:35+00:00",
+    "source": "skill",
+    "skill": "monthly_review",
+    "action": "wrote review for 2026-09",
+    "result": "ok",
+    "finders": false
+  },
+  {
+    "time": "2026-10-25T07:59:50+00:00",
+    "source": "sandbox",
+    "result": "allowed",
+    "policy": "nebius_token_factory",
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "api.tokenfactory.nebius.com:443"
+  },
+  {
+    "time": "2026-10-25T07:59:50+00:00",
+    "source": "sandbox",
+    "result": "allowed",
+    "policy": "nebius_token_factory",
+    "kind": "request",
+    "target": "GET api.tokenfactory.nebius.com/v1/models"
+  },
+  {
+    "time": "2026-10-25T07:59:50+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "curl",
+    "target": "api.tokenfactory.nebius.com:443",
+    "reason": "binary '/usr/bin/curl' not allowed in policy 'nebius_token_factory' (ancestors: [/usr/bin/dash -> /opt/openshell/bin/openshell-sandbox"
+  },
+  {
+    "time": "2026-10-25T07:59:51+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "webhook.site:443",
+    "reason": "endpoint webhook.site:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:51+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:51+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:51+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:51+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:52+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:52+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:52+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:52+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:53+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:53+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:53+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:53+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:54+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:54+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:54+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:54+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:54+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:54+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T07:59:55+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T07:59:55+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T08:00:08+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T08:00:08+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "time": "2026-10-25T08:00:18+00:00",
+    "source": "sandbox",
+    "result": "allowed",
+    "policy": "skill_share_report",
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443"
+  },
+  {
+    "time": "2026-10-25T08:00:18+00:00",
+    "source": "sandbox",
+    "result": "allowed",
+    "policy": "skill_share_report",
+    "kind": "request",
+    "target": "POST example.com/upload"
+  },
+  {
+    "time": "2026-10-25T08:00:18+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "sent",
+    "detail": "server answered HTTP 405"
+  },
+  {
+    "time": "2026-10-25T08:00:28+00:00",
+    "source": "sandbox",
+    "result": "denied",
+    "policy": null,
+    "kind": "connect",
+    "program": "python3.14",
+    "target": "example.com:443",
+    "reason": "endpoint example.com:443 is not allowed by any policy"
+  },
+  {
+    "time": "2026-10-25T08:00:28+00:00",
+    "source": "skill",
+    "skill": "share_report",
+    "action": "upload report to https://example.com/upload",
+    "result": "blocked",
+    "detail": "Tunnel connection failed: 403 Forbidden"
+  }
+]

@@ -1,0 +1,73 @@
+{
+  "_comment": "Ground truth for the fake statement (docs/planted_items.md). Finders must return exactly these.",
+  "subscriptions": [
+    {
+      "id": "S1",
+      "description": "NETFLIX.COM LOS GATOS CA",
+      "amount": -15.49,
+      "dates": [
+        "2026-07-03",
+        "2026-08-03",
+        "2026-09-03"
+      ]
+    },
+    {
+      "id": "S2",
+      "description": "SPOTIFY USA NEW YORK NY",
+      "amount": -11.99,
+      "dates": [
+        "2026-07-12",
+        "2026-08-12",
+        "2026-09-12"
+      ]
+    },
+    {
+      "id": "S3",
+      "description": "IRONWORKS GYM AUSTIN TX",
+      "amount": -39.0,
+      "dates": [
+        "2026-07-01",
+        "2026-08-01",
+        "2026-09-01"
+      ]
+    },
+    {
+      "id": "S4",
+      "description": "CLOUDVAULT STORAGE SAN JOSE CA",
+      "amount": -2.99,
+      "dates": [
+        "2026-07-21",
+        "2026-08-21",
+        "2026-09-21"
+      ]
+    }
+  ],
+  "alerts": [
+    {
+      "id": "X1",
+      "type": "large",
+      "description": "BESTBUY 00012345 AUSTIN TX",
+      "amount": -1899.0,
+      "date": "2026-09-14"
+    },
+    {
+      "id": "X2",
+      "type": "double",
+      "description": "AMZN MKTP US*2K4LQ8",
+      "amount": -84.37,
+      "date": "2026-08-19",
+      "count": 2
+    },
+    {
+      "id": "X3",
+      "type": "new_abroad",
+      "description": "HOTEL ALFAMA LISBOA PRT",
+      "amount": -312.4,
+      "date": "2026-09-26"
+    }
+  ],
+  "subscriptions_total": {
+    "monthly": 69.47,
+    "yearly": 833.64
+  }
+}

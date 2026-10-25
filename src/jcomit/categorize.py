@@ -75,7 +75,12 @@ def default_redactor(txns: list[Transaction] = ()) -> Redact | None:
         from .redact import Redactor
     except ImportError:
         return None
-    r = Redactor(known=sorted({v for t in txns for v in (t.account_holder, t.account_number, t.card_last4)}))
+    known = sorted({v for t in txns for v in (t.account_holder, t.account_number, t.card_last4)})
+    r = Redactor(known=known)
+    # Label the statement's own values first, so the holder is always [NAME_1],
+    # the account [ACCT_1] and the card [CARD_1] (docs/private_details.md).
+    for v in known:
+        r.redact(v)
 
     def redact(text: str) -> str:
         out = r.redact(text)

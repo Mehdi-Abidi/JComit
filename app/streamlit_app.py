@@ -9,6 +9,12 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
+# Load pyarrow fully before anything else. Streamlit imports it lazily on another
+# thread, and Altair's data check reads it from sys.modules; on a cold start it can
+# see the half-imported module and fail with "module 'pyarrow' has no attribute
+# 'Table'" (seen on Streamlit Cloud).
+import pyarrow  # noqa: F401, I001
+
 import altair as alt
 import streamlit as st
 

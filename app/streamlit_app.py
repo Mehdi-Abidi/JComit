@@ -8,6 +8,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+import altair as alt
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -32,7 +33,12 @@ def load_json(folder: Path, name: str, default):
 
 
 def money(x: float) -> str:
-    return f"${abs(x):,.2f}"
+    return f"{'-' if x < 0 else ''}${abs(x):,.2f}"
+
+
+def esc(text: str) -> str:
+    """Markdown reads text between two $ signs as maths; show them as plain dollars."""
+    return text.replace("$", "\\$")
 
 
 folder, source = results_dir()
@@ -60,14 +66,16 @@ with hide:
     with rows_tab:
         def full_row(t):
             card = f" · card {t.card_last4}" if t.card_last4 else ""
-            return f"{t.description} · {t.account_holder} · acct {t.account_number}{card}"
+            return f"{t.description} · {t.account_holder} · {t.account_number}{card}"
 
         # Rows with private details in the description first: they show the most.
-        ordered = sorted(txns, key=lambda t: redact(t.description) == t.description)
-        st.dataframe(
-            [{"raw": full_row(t), "after redaction": redact(full_row(t))} for t in ordered[:40]],
-            hide_index=True, use_container_width=True, height=420,
-        )
+        seen, examples = set(), []
+        for t in sorted(txns, key=lambda t: redact(t.description) == t.description):
+            if t.description not in seen:
+                seen.add(t.description)
+                examples.append(t)
+        st.caption("Every row carries the holder's name and account number. None of it reaches the model.")
+        st.table([{"raw": full_row(t), "after redaction": redact(full_row(t))} for t in examples[:12]])
 
     with receipts_tab:
         receipts = sorted((ROOT / "data" / "receipts").glob("*.txt"))
@@ -102,26 +110,33 @@ with results:
         m1, m2, m3 = st.columns(3)
         m1.metric("Income", money(review["income"]))
         m2.metric("Spent", money(review["spending_total"]))
-        m3.metric("Difference", money(review["income"] - review["spending_total"]),
-                  delta=round(review["income"] - review["spending_total"], 2), delta_color="normal")
+        m3.metric("Difference", money(review["income"] - review["spending_total"]))
 
-        st.info(f"**Nemotron's review.** {review['review']}")
+        st.info(esc(f"**Nemotron's review.** {review['review']}"))
 
-        st.bar_chart(
-            [{"category": k, "spent": v} for k, v in review["spending_by_category"].items()],
-            x="category", y="spent", horizontal=True, height=300,
+        spend = review["spending_by_category"]
+        st.altair_chart(
+            alt.Chart(alt.Data(values=[{"category": k, "spent": v} for k, v in spend.items()]))
+            .mark_bar()
+            .encode(
+                x=alt.X("spent:Q", title="Spent ($)"),
+                y=alt.Y("category:N", sort="-x", title=None),
+                tooltip=["category:N", alt.Tooltip("spent:Q", format="$,.2f")],
+            )
+            .properties(height=28 * len(spend) + 40),
+            use_container_width=True,
         )
 
         subs = review.get("subscriptions", [])
         if subs:
             total = sum(-s["amount"] for s in subs)
-            st.markdown(f"**Subscriptions:** {money(total)} a month, {money(total * 12)} a year")
-            st.dataframe([{"shop": s["merchant"], "monthly": money(s["amount"])} for s in subs],
-                         hide_index=True, use_container_width=True)
+            st.markdown(esc(f"**Subscriptions:** {money(total)} a month, {money(total * 12)} a year"))
+            st.table([{"shop": s["merchant"], "monthly": money(-s["amount"])} for s in subs])
 
         labels = {"large": "Very large charge", "double": "Charged twice", "new_abroad": "New shop abroad"}
         for a in review.get("alerts", []):
-            st.warning(f"**{labels.get(a['type'], a['type'])}:** {a['merchant']}, {money(a['amount'])} on {a['date']}")
+            st.warning(esc(f"**{labels.get(a['type'], a['type'])}:** {a['merchant']}, "
+                           f"{money(-a['amount'])} on {a['date']}"))
 
     items = categorized["items"]
     if items:
@@ -138,13 +153,14 @@ with results:
 with actions:
     st.subheader("3. Action log")
     bad = sum(1 for e in log if e["result"] in ("denied", "blocked"))
-    st.caption(f"{len(log)} events, {bad} blocked or denied. Green: allowed. Red: stopped by the sandbox.")
+    st.caption(f"{len(log)} events, {bad} blocked or denied, newest first. "
+               "Green: allowed. Red: stopped by the sandbox.")
     with st.container(height=760):
-        for e in log:
+        for e in reversed(log):
             who = e.get("skill") or e.get("program") or ""
             what = e.get("action") or e.get("target") or ""
             why = e.get("reason") or e.get("detail") or (f"policy: {e['policy']}" if e.get("policy") else "")
             line = f"`{e['time'][11:19]}` **{e['result'].upper()}** {e['source']} {who}  \n{what}"
             if why:
                 line += f"  \n_{why}_"
-            (st.error if e["result"] in ("denied", "blocked") else st.success)(line)
+            (st.error if e["result"] in ("denied", "blocked") else st.success)(esc(line))

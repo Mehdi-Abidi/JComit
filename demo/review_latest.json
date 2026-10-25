@@ -1,0 +1,58 @@
+{
+  "month": "2026-09",
+  "income": 4200.0,
+  "spending_total": 6068.06,
+  "spending_by_category": {
+    "Shopping": 2278.93,
+    "Housing": 1450.0,
+    "Dining": 707.45,
+    "Travel": 596.4,
+    "Groceries": 570.68,
+    "Bills": 179.9,
+    "Transport": 122.97,
+    "Health": 59.39,
+    "Fitness": 39.0,
+    "Entertainment": 27.48,
+    "Other": 26.49,
+    "Fees": 9.37
+  },
+  "subscriptions": [
+    {
+      "merchant": "IRONWORKS GYM AUSTIN TX",
+      "amount": -39.0
+    },
+    {
+      "merchant": "NETFLIX.COM LOS GATOS CA",
+      "amount": -15.49
+    },
+    {
+      "merchant": "SPOTIFY USA NEW YORK NY",
+      "amount": -11.99
+    },
+    {
+      "merchant": "CLOUDVAULT STORAGE SAN JOSE CA",
+      "amount": -2.99
+    }
+  ],
+  "alerts": [
+    {
+      "type": "double",
+      "merchant": "AMZN MKTP US*2K4LQ8",
+      "amount": -84.37,
+      "date": "2026-08-19"
+    },
+    {
+      "type": "large",
+      "merchant": "BESTBUY 00012345 AUSTIN TX",
+      "amount": -1899.0,
+      "date": "2026-09-14"
+    },
+    {
+      "type": "new_abroad",
+      "merchant": "HOTEL ALFAMA LISBOA PRT",
+      "amount": -312.4,
+      "date": "2026-09-26"
+    }
+  ],
+  "review": "In September 2026 you earned $4,200 but spent $6,068.06, leaving a shortfall of about $1,868. Your biggest expense was Shopping at $2,278.93, followed by Housing and Dining. You have four recurring subscriptions\u2014IRONWORKS GYM ($39), Netflix ($15.49), Spotify ($11.99) and CloudVault Storage ($2.99). Worth a quick look are the alerts: a possible duplicate Amazon charge of $84.37, a large Best\u202fBuy purchase of $1,899 on Sep\u202f14, and a new hotel stay in Lisbon for $312.40 on Sep\u202f26."
+}

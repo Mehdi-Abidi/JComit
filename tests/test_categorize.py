@@ -91,6 +91,14 @@ def test_no_redactor_means_nothing_is_sent():
     assert result.items[0].source == "unreviewed"
 
 
+def test_statement_values_get_the_first_labels():
+    from jcomit.categorize import default_redactor
+
+    redact = default_redactor([txn("X")])
+    assert redact("ZELLE TO OMAR KHAN") == "ZELLE TO [NAME_2]"
+    assert redact("Sara Ahmed 4421 9987 card ending 5521") == "[NAME_1] [ACCT_1] card ending [CARD_1]"
+
+
 def test_parse_answer_ignores_unknown_ids_and_categories():
     assert parse_answer('{"1": "Dining", "2": "Spaceships", "9": "Travel"}', ["1", "2"]) == {
         "1": "Dining", "2": "Other",

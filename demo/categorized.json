@@ -1,0 +1,1070 @@
+{
+  "items": [
+    {
+      "date": "2026-07-01",
+      "description": "ONLINE TRANSFER TO LANDLORD REF 7781",
+      "amount": -1450.0,
+      "category": "Housing",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-01",
+      "description": "PAYROLL DEPOSIT ACME CORP",
+      "amount": 2100.0,
+      "category": "Income",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-01",
+      "description": "IRONWORKS GYM AUSTIN TX",
+      "amount": -39.0,
+      "category": "Fitness",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-02",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -18.68,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-02",
+      "description": "AMZN MKTP US*X78ASZ",
+      "amount": -67.97,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-03",
+      "description": "NETFLIX.COM LOS GATOS CA",
+      "amount": -15.49,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-03",
+      "description": "BOOK PEOPLE AUSTIN TX",
+      "amount": -94.01,
+      "category": "Shopping",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-07-04",
+      "description": "HEB #482 AUSTIN TX",
+      "amount": -138.88,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-04",
+      "description": "DOORDASH*SLICE PIZZA",
+      "amount": -35.34,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-07",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -32.82,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-07",
+      "description": "AMZN MKTP US*7SRXFW",
+      "amount": -36.12,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-09",
+      "description": "ZELLE TO OMAR KHAN",
+      "amount": -60.0,
+      "category": "Transfers",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-10",
+      "description": "AMZN MKTP US*XRH0UB",
+      "amount": -93.79,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-11",
+      "description": "WHOLEFDS AUS 10233",
+      "amount": -79.8,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-12",
+      "description": "SPOTIFY USA NEW YORK NY",
+      "amount": -11.99,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-13",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -21.51,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-13",
+      "description": "ZILKER HARDWARE AUSTIN TX",
+      "amount": -83.17,
+      "category": "Shopping",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-07-14",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -6.23,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-14",
+      "description": "CHIPOTLE 1842 AUSTIN TX",
+      "amount": -54.75,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-14",
+      "description": "AMZN MKTP US*FY7B5X",
+      "amount": -72.38,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-14",
+      "description": "CVS/PHARMACY #0912 AUSTIN TX",
+      "amount": -27.28,
+      "category": "Health",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-15",
+      "description": "PAYROLL DEPOSIT ACME CORP",
+      "amount": 2100.0,
+      "category": "Income",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-15",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -19.82,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-16",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -7.03,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-16",
+      "description": "TORCHYS TACOS AUSTIN TX",
+      "amount": -10.82,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-16",
+      "description": "TECOVAS BOOTS AUSTIN TX",
+      "amount": -38.14,
+      "category": "Shopping",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-07-17",
+      "description": "DOORDASH*SLICE PIZZA",
+      "amount": -57.51,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-18",
+      "description": "AUSTIN ENERGY BILL PAY",
+      "amount": -109.09,
+      "category": "Bills",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-18",
+      "description": "HEB #482 AUSTIN TX",
+      "amount": -157.93,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-18",
+      "description": "SHELL OIL 5741 AUSTIN TX",
+      "amount": -36.26,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-19",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -53.2,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "AMZN MKTP US*ZAXH66",
+      "amount": -27.04,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-21",
+      "description": "CLOUDVAULT STORAGE SAN JOSE CA",
+      "amount": -2.99,
+      "category": "Bills",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-07-21",
+      "description": "AMC THEATRES 4421 AUSTIN TX",
+      "amount": -18.66,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-24",
+      "description": "CVS/PHARMACY #0912 AUSTIN TX",
+      "amount": -17.63,
+      "category": "Health",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-25",
+      "description": "AT&T BILL PAY",
+      "amount": -69.48,
+      "category": "Bills",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-25",
+      "description": "WHOLEFDS AUS 10233",
+      "amount": -88.48,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-26",
+      "description": "AMZN MKTP US*YGKU5P",
+      "amount": -33.52,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-28",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -85.05,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -6.19,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -28.8,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-07-30",
+      "description": "FRANKLIN BARBECUE AUSTIN TX",
+      "amount": -23.31,
+      "category": "Dining",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-07-31",
+      "description": "AUSTIN PET SUPPLY AUSTIN TX",
+      "amount": -49.85,
+      "category": "Shopping",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-08-01",
+      "description": "ONLINE TRANSFER TO LANDLORD REF 7781",
+      "amount": -1450.0,
+      "category": "Housing",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-01",
+      "description": "PAYROLL DEPOSIT ACME CORP",
+      "amount": 2100.0,
+      "category": "Income",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-01",
+      "description": "IRONWORKS GYM AUSTIN TX",
+      "amount": -39.0,
+      "category": "Fitness",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-01",
+      "description": "HEB #482 AUSTIN TX",
+      "amount": -101.86,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-02",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -34.67,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-02",
+      "description": "AUSTIN360 TICKETS AUSTIN TX",
+      "amount": -136.72,
+      "category": "Entertainment",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-08-03",
+      "description": "NETFLIX.COM LOS GATOS CA",
+      "amount": -15.49,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-03",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -54.44,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-03",
+      "description": "AMC THEATRES 4421 AUSTIN TX",
+      "amount": -12.36,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-04",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -28.06,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-05",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -96.84,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-06",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -41.96,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-07",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -24.22,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-07",
+      "description": "ZELLE FROM HINA RAZA",
+      "amount": 45.0,
+      "category": "Transfers",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-08",
+      "description": "WHOLEFDS AUS 10233",
+      "amount": -48.15,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-09",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -32.88,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-09",
+      "description": "BARTON SPRINGS CAFE AUSTIN TX",
+      "amount": -63.94,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-10",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -6.84,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-10",
+      "description": "AMC THEATRES 4421 AUSTIN TX",
+      "amount": -34.53,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-12",
+      "description": "SPOTIFY USA NEW YORK NY",
+      "amount": -11.99,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-14",
+      "description": "AMZN MKTP US*FR93KG",
+      "amount": -77.03,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-15",
+      "description": "PAYROLL DEPOSIT ACME CORP",
+      "amount": 2100.0,
+      "category": "Income",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-15",
+      "description": "HEB #482 AUSTIN TX",
+      "amount": -164.19,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-18",
+      "description": "AUSTIN ENERGY BILL PAY",
+      "amount": -81.86,
+      "category": "Bills",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-18",
+      "description": "AMZN MKTP US*RTTKDH",
+      "amount": -9.64,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-19",
+      "description": "AMZN MKTP US*2K4LQ8",
+      "amount": -84.37,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-19",
+      "description": "AMZN MKTP US*2K4LQ8",
+      "amount": -84.37,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-19",
+      "description": "AMZN MKTP US*DRMU44",
+      "amount": -32.9,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-20",
+      "description": "DOORDASH*SLICE PIZZA",
+      "amount": -58.9,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-21",
+      "description": "CLOUDVAULT STORAGE SAN JOSE CA",
+      "amount": -2.99,
+      "category": "Bills",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-08-21",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -24.95,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-22",
+      "description": "WHOLEFDS AUS 10233",
+      "amount": -115.4,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-23",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -59.42,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-23",
+      "description": "AUSTIN360 TICKETS AUSTIN TX",
+      "amount": -50.44,
+      "category": "Entertainment",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-08-24",
+      "description": "TORCHYS TACOS AUSTIN TX",
+      "amount": -33.11,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-25",
+      "description": "AT&T BILL PAY",
+      "amount": -65.66,
+      "category": "Bills",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-27",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -20.13,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-28",
+      "description": "DOORDASH*SLICE PIZZA",
+      "amount": -52.18,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-28",
+      "description": "TRANSFER TO SAVINGS ACCT 4421 9987 0012",
+      "amount": -300.0,
+      "category": "Transfers",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-29",
+      "description": "HEB #482 AUSTIN TX",
+      "amount": -160.75,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-30",
+      "description": "DOORDASH*PAD THAI HOUSE",
+      "amount": -23.24,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-30",
+      "description": "FRANKLIN BARBECUE AUSTIN TX",
+      "amount": -62.2,
+      "category": "Dining",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-08-31",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -49.04,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-08-31",
+      "description": "TORCHYS TACOS AUSTIN TX",
+      "amount": -44.67,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-01",
+      "description": "ONLINE TRANSFER TO LANDLORD REF 7781",
+      "amount": -1450.0,
+      "category": "Housing",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-01",
+      "description": "PAYROLL DEPOSIT ACME CORP",
+      "amount": 2100.0,
+      "category": "Income",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-01",
+      "description": "IRONWORKS GYM AUSTIN TX",
+      "amount": -39.0,
+      "category": "Fitness",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-01",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -20.8,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-03",
+      "description": "NETFLIX.COM LOS GATOS CA",
+      "amount": -15.49,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-03",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -6.98,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-03",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -29.36,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-04",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -6.92,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-04",
+      "description": "FRANKLIN BARBECUE AUSTIN TX",
+      "amount": -50.12,
+      "category": "Dining",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-09-05",
+      "description": "WHOLEFDS AUS 10233",
+      "amount": -96.69,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-05",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -17.05,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-05",
+      "description": "TORCHYS TACOS AUSTIN TX",
+      "amount": -14.07,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-05",
+      "description": "AMZN MKTP US*A4MZ2H",
+      "amount": -90.32,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-05",
+      "description": "SQ *BLUE DOOR LLC",
+      "amount": -23.5,
+      "category": "Other",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-09-06",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -40.94,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-08",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -13.57,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-09",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -19.93,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-10",
+      "description": "TORCHYS TACOS AUSTIN TX",
+      "amount": -43.16,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-10",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -60.22,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-10",
+      "description": "SOUTHWEST AIR 5262345678901",
+      "amount": -284.0,
+      "category": "Travel",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-10",
+      "description": "LAMAR FLORIST AUSTIN TX",
+      "amount": -71.28,
+      "category": "Shopping",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-09-11",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -39.05,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-11",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -25.24,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-11",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -20.41,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-11",
+      "description": "TARGET 00023 AUSTIN TX",
+      "amount": -51.76,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-12",
+      "description": "SPOTIFY USA NEW YORK NY",
+      "amount": -11.99,
+      "category": "Entertainment",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-12",
+      "description": "HEB #482 AUSTIN TX",
+      "amount": -151.37,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-12",
+      "description": "CHIPOTLE 1842 AUSTIN TX",
+      "amount": -45.77,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-12",
+      "description": "SOUTH CONGRESS BIKES AUSTIN TX",
+      "amount": -15.15,
+      "category": "Shopping",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-09-14",
+      "description": "BESTBUY 00012345 AUSTIN TX",
+      "amount": -1899.0,
+      "category": "Shopping",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-14",
+      "description": "SHELL OIL 5741 AUSTIN TX",
+      "amount": -39.13,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-15",
+      "description": "PAYROLL DEPOSIT ACME CORP",
+      "amount": 2100.0,
+      "category": "Income",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-15",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -6.33,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-18",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -5.1,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-18",
+      "description": "AUSTIN ENERGY BILL PAY",
+      "amount": -101.14,
+      "category": "Bills",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-18",
+      "description": "DOORDASH*SLICE PIZZA",
+      "amount": -28.65,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-19",
+      "description": "WHOLEFDS AUS 10233",
+      "amount": -160.68,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-19",
+      "description": "TORCHYS TACOS AUSTIN TX",
+      "amount": -26.24,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-19",
+      "description": "CVS/PHARMACY #0912 AUSTIN TX",
+      "amount": -41.17,
+      "category": "Health",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-21",
+      "description": "CLOUDVAULT STORAGE SAN JOSE CA",
+      "amount": -2.99,
+      "category": "Bills",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-09-21",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -6.43,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-21",
+      "description": "DOORDASH*PAD THAI HOUSE",
+      "amount": -40.59,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-21",
+      "description": "CVS/PHARMACY #0912 AUSTIN TX",
+      "amount": -18.22,
+      "category": "Health",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-24",
+      "description": "DOORDASH*TACO DELI",
+      "amount": -36.06,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-24",
+      "description": "DOORDASH*SLICE PIZZA",
+      "amount": -60.56,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-25",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -33.36,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-25",
+      "description": "AT&T BILL PAY",
+      "amount": -78.76,
+      "category": "Bills",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-25",
+      "description": "DOORDASH*PAD THAI HOUSE",
+      "amount": -21.26,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-26",
+      "description": "HOTEL ALFAMA LISBOA PRT",
+      "amount": -312.4,
+      "category": "Travel",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-26",
+      "description": "FOREIGN TRANSACTION FEE",
+      "amount": -9.37,
+      "category": "Fees",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-09-26",
+      "description": "STARBUCKS #1234 AUSTIN TX",
+      "amount": -5.15,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-26",
+      "description": "UBER *TRIP HELP.UBER.COM",
+      "amount": -29.68,
+      "category": "Transport",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-26",
+      "description": "HEB #482 AUSTIN TX",
+      "amount": -161.94,
+      "category": "Groceries",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-26",
+      "description": "TERRA TOYS AUSTIN TX",
+      "amount": -45.55,
+      "category": "Shopping",
+      "source": "nemotron"
+    },
+    {
+      "date": "2026-09-28",
+      "description": "DOORDASH*PAD THAI HOUSE",
+      "amount": -16.22,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-29",
+      "description": "DOORDASH*PAD THAI HOUSE",
+      "amount": -57.18,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-30",
+      "description": "DOORDASH*PAD THAI HOUSE",
+      "amount": -24.99,
+      "category": "Dining",
+      "source": "rule"
+    },
+    {
+      "date": "2026-09-30",
+      "description": "JUSTINES CAFE AUSTIN TX",
+      "amount": -45.77,
+      "category": "Dining",
+      "source": "rule"
+    }
+  ],
+  "sent_to_model": [
+    {
+      "original": "BOOK PEOPLE AUSTIN TX",
+      "redacted": "BOOK PEOPLE AUSTIN TX"
+    },
+    {
+      "original": "ZILKER HARDWARE AUSTIN TX",
+      "redacted": "ZILKER HARDWARE AUSTIN TX"
+    },
+    {
+      "original": "TECOVAS BOOTS AUSTIN TX",
+      "redacted": "TECOVAS BOOTS AUSTIN TX"
+    },
+    {
+      "original": "CLOUDVAULT STORAGE SAN JOSE CA",
+      "redacted": "CLOUDVAULT STORAGE SAN JOSE CA"
+    },
+    {
+      "original": "FRANKLIN BARBECUE AUSTIN TX",
+      "redacted": "FRANKLIN BARBECUE AUSTIN TX"
+    },
+    {
+      "original": "AUSTIN PET SUPPLY AUSTIN TX",
+      "redacted": "AUSTIN PET SUPPLY AUSTIN TX"
+    },
+    {
+      "original": "AUSTIN360 TICKETS AUSTIN TX",
+      "redacted": "AUSTIN360 TICKETS AUSTIN TX"
+    },
+    {
+      "original": "SQ *BLUE DOOR LLC",
+      "redacted": "SQ *BLUE DOOR LLC"
+    },
+    {
+      "original": "LAMAR FLORIST AUSTIN TX",
+      "redacted": "LAMAR FLORIST AUSTIN TX"
+    },
+    {
+      "original": "SOUTH CONGRESS BIKES AUSTIN TX",
+      "redacted": "SOUTH CONGRESS BIKES AUSTIN TX"
+    },
+    {
+      "original": "FOREIGN TRANSACTION FEE",
+      "redacted": "FOREIGN TRANSACTION FEE"
+    },
+    {
+      "original": "TERRA TOYS AUSTIN TX",
+      "redacted": "TERRA TOYS AUSTIN TX"
+    }
+  ],
+  "blocked": null
+}

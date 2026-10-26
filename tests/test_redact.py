@@ -169,3 +169,63 @@ def test_huge_input_is_fast():
 
 def test_junk_known_values_are_ignored():
     assert Redactor(known=["-", ",", "", " "]).redact("NETFLIX 15.49") == "NETFLIX 15.49"
+
+
+@pytest.mark.parametrize("text", [
+    "SARA M AHMED", "Sara M. Ahmed", "SARA.AHMED", "SARA_AHMED",
+    "ＳＡＲＡ ＡＨＭＥＤ", "S​ara Ahmed",
+])
+def test_known_name_odd_spellings(text):
+    assert Redactor(known=KNOWN).redact(text) == "[NAME_1]"
+
+
+@pytest.mark.parametrize("text, leaked", [
+    ("VENMO *OMAR KHAN", "OMAR"),
+    ("VENMO PAYMENT 5125550142", "5125550142"),
+    ("call 5125550142", "5125550142"),
+    ("card 4111.1111.1111.1111", "1111"),
+    ("1207 Rainey Pkwy", "Rainey"),
+    ("1207 Rainey St, Austin, TX 78701-1234", "1234"),
+    ("SSN 123-45-6789", "6789"),
+    ("SSN 123456789", "6789"),
+])
+def test_second_round_leaks(text, leaked):
+    assert leaked not in Redactor().redact(text)
+
+
+def test_store_and_reference_numbers_survive():
+    r = Redactor(known=KNOWN)
+    for t in ["AMC THEATRES 4421 AUSTIN TX", "SOUTHWEST AIR 5262345678901", "SQ *BLUE DOOR 4421", "HEB #482"]:
+        assert r.redact(t) == t
+
+
+@pytest.mark.parametrize("text, leaked", [
+    ("Sāra Ahmed", "ra A"),
+    ("SaraAhmed", "Sara"),
+    ("Hi Sara,", "Sara"),
+    ("Ms. Ahmed", "Ahmed"),
+    ("TRANSFER FROM CHK 1234567890", "1234567890"),
+    ("routing 021000021", "021000021"),
+    ("DOB 01/02/1990", "1990"),
+    ("IBAN GB82 WEST 1234 5698 7654 32", "5698"),
+])
+def test_third_round_leaks(text, leaked):
+    assert leaked not in Redactor(known=KNOWN).redact(text)
+
+
+def test_lone_name_rule_leaves_every_statement_shop_alone():
+    r = Redactor(known=KNOWN)
+    changed = {t.description for t in load(DATA / "statement.csv") if r.redact(t.description) != t.description}
+    assert changed == {"ZELLE TO OMAR KHAN", "ZELLE FROM HINA RAZA", "TRANSFER TO SAVINGS ACCT 4421 9987 0012"}
+
+
+def test_fuzzed_spellings_of_known_values_never_leak():
+    import random
+    rng = random.Random(7)
+    seps = [" ", "  ", "-", ".", "_", "/", ", ", "\t", "​"]
+    for _ in range(300):
+        s = rng.choice(seps)
+        name = rng.choice([f"sara{s}ahmed", f"ahmed{s}sara", f"s{s}ahmed", f"sara{s}m{s}ahmed"]).upper() if rng.random() < .5 else f"Sara{s}Ahmed"
+        acct = rng.choice([" ", "-", ".", ""]).join(["4421", "9987"])
+        out = Redactor(known=KNOWN).redact(f"X {name} Y {acct} Z")
+        assert "AHMED" not in out.upper() and "9987" not in out, out

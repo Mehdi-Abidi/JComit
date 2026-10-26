@@ -18,8 +18,7 @@ MODEL_CATEGORIES = (
     "Housing", "Income", "Groceries", "Dining", "Transport", "Shopping", "Entertainment",
     "Health", "Fitness", "Travel", "Bills", "Fees", "Transfers", "Other",
 )
-# Only the user can pick these, by teaching memory ("Starbucks is a work expense").
-# The model isn't offered them: it can't know which coffee was for work.
+
 USER_ONLY_CATEGORIES = ("Work",)
 CATEGORIES = MODEL_CATEGORIES + USER_ONLY_CATEGORIES
 

@@ -1,111 +1,260 @@
 # JComit
 
-A private personal-finance agent. It reads bank statements and receipts on your own machine, redacts personal details, and only then asks NVIDIA Nemotron (served by Nebius Token Factory) for help. It runs inside a sandbox that can reach Token Factory and nothing else.
+JComit is a private personal-finance agent. It reads your bank statements and receipts on your own machine, strips out names, account numbers and card numbers, and only then asks NVIDIA Nemotron for help. The agent runs inside an NVIDIA OpenShell sandbox that can reach Nebius Token Factory and nothing else.
 
-Built for the Nebius x NVIDIA Global AI Hackathon 2026, Personal AI track.
+**Live demo:** [jcomit.streamlit.app](https://jcomit.streamlit.app)
+**Demo video:** TBA
+**Devpost:** TBA
 
-> Work in progress. All data in this repo is synthetic.
+Built for the Nebius x NVIDIA Global AI Hackathon 2026, Personal AI track. All data in this repository is synthetic.
 
-## Use it
+## Contents
 
-```bash
-python -m pytest                                              # unit tests, no network
-PYTHONPATH=src python -m jcomit.cli categorize data/statement.csv --show-sent
-PYTHONPATH=src python -m jcomit.cli correct "SQ *BLUE DOOR LLC" Dining
-PYTHONPATH=src python -m jcomit.cli memory                     # corrections survive restarts
+- [The problem](#the-problem)
+- [What JComit does](#what-jcomit-does)
+- [How it works](#how-it-works)
+- [How we used NVIDIA and Nebius](#how-we-used-nvidia-and-nebius)
+- [Sandbox rules](#sandbox-rules)
+- [Screenshots](#screenshots)
+- [Run it](#run-it)
+- [Project layout](#project-layout)
+- [Tests](#tests)
+- [Known limitations](#known-limitations)
+- [Team](#team)
+- [License](#license)
+
+## The problem
+
+AI is good at making sense of spending. Using it, though, usually means uploading a bank statement to someone else's server, with your name, account number and card number on every line. Most people will not do that, and they are right not to.
+
+JComit keeps the statement on your machine. The model sees shop names and labels like `[NAME_1]`, never the person behind them. And because the agent lives in a sandbox, a bug or a prompt injection cannot send your data anywhere the policy does not allow.
+
+## What JComit does
+
+- **Hides private details** before anything leaves the machine. Names, account numbers, IBANs, card numbers, Social Security numbers, dates of birth, emails, phone numbers and addresses become labels such as `[NAME_1]` and `[ACCT_1]`.
+- **Sorts spending into categories.** Simple rules handle common shops. Nemotron handles the rest.
+- **Finds subscriptions and strange charges.** On the demo statement it finds 4 subscriptions ($69.47 a month) and 3 alerts: a $1,899 purchase, a double Amazon charge and a first-time hotel abroad.
+- **Writes a monthly review** with Nemotron, from category totals only.
+- **Remembers your corrections.** Tell it once that Starbucks is a work expense, and it applies that on every later statement, including after a restart.
+- **Logs every action**, allowed or blocked, with the reason the sandbox gave.
+
+## How it works
+
+```
+ Bank statement (CSV) and receipts
+              |
+              v
+ +--------------------------+      Runs on your machine, inside the
+ | 1. Memory and rules      |      NVIDIA OpenShell sandbox
+ |    memory.py, RULES      |
+ +--------------------------+
+              | shops the rules do not know
+              v
+ +--------------------------+
+ | 2. Redaction             |      redact.py: names, accounts, cards,
+ |                          |      IDs, contact details -> labels
+ +--------------------------+
+              v
+ +--------------------------+
+ | 3. Leak guard            |      guard.py: refuses any payload that
+ |                          |      still holds the holder's details
+ +--------------------------+
+              v
+ +--------------------------+
+ | 4. Nemotron 3 Super      |      Nebius Token Factory, the only host
+ |                          |      the sandbox policy allows
+ +--------------------------+
 ```
 
-Categories come from the user's saved corrections first, then simple rules, then Nemotron 3 Super on Nebius Token Factory for the merchants the rules don't know. Only redacted text reaches the model, and a guard refuses any payload that still contains the account holder's name, account number or card number. How the modules fit together: [docs/interfaces.md](docs/interfaces.md).
+On the demo statement, rules sort 128 of 145 transactions. The other 17 come from 12 shops the rules do not know. Nemotron sorts all 12 in a single request, each shop asked once. The model never receives the account holder's name, account number or card number. Rows that name other people, such as Zelle transfers, are sorted by rules on the demo data; if one did reach the model, redaction would have replaced the name first.
 
-## How the sandbox works
+Categories are decided in a fixed order: the user's saved corrections, then rules, then Nemotron. The page shows which one decided each transaction.
 
-```
- ┌──────────── sandbox network (internal, no internet) ────────────┐
- │                                                                 │
- │   jcomit-app  ──HTTPS_PROXY──►  jcomit-egress (tinyproxy)       │
- │                                    │  default deny               │
- └────────────────────────────────────┼────────────────────────────┘
-                                      ▼
-                      api.tokenfactory.nebius.com  (only allowed host)
-```
+## How we used NVIDIA and Nebius
 
-- The app container has no route to the internet. Even code that ignores the proxy cannot get out.
-- The egress proxy allows only the hosts in [egress/allowlist.txt](egress/allowlist.txt). Everything else is refused.
-- Every allowed and refused request is written to `logs/egress.log`.
+**NVIDIA Nemotron 3 Super** (`nvidia/nemotron-3-super-120b-a12b`) does the two tasks that need judgement. It sorts shops the rules cannot place, such as Franklin Barbecue (Dining) or a foreign transaction fee (Fees). It also writes the monthly review from category totals, subscriptions and alerts. In testing, sorting a single shop took 138 tokens, a small fraction of a cent.
 
-## Setup
+**Nebius Token Factory** serves Nemotron through an OpenAI-compatible API at `api.tokenfactory.nebius.com`. It is the only network destination the sandbox policy allows. The client in [src/jcomit/llm.py](src/jcomit/llm.py) uses only the Python standard library, so it runs inside the sandbox, where pip is blocked.
 
-Requirements: Docker Desktop.
+**NVIDIA OpenShell** enforces the boundary:
 
-```bash
-cp .env.example .env          # add NEBIUS_API_KEY
-docker compose up -d --build
+- Network rules allow one host, one program and two paths: Python may call `POST /v1/chat/completions` and `GET /v1/models` on Token Factory. Every other host, program or path is denied.
+- Filesystem rules make the code read-only and allow writes only in `/sandbox/data`.
+- The Token Factory key is attached as an OpenShell provider. Code inside the sandbox sees a placeholder, and OpenShell injects the real key at the network boundary, so even compromised code cannot read it.
+- Every connection is logged with its decision and a reason, for example `endpoint example.com:443 is not allowed by any policy`.
 
-# 1. List Nemotron models, then set NEBIUS_MODEL in .env
-docker compose exec app python scripts/check_tokenfactory.py
-docker compose up -d          # reload .env
-docker compose exec app python scripts/check_tokenfactory.py
+The policy is generated from the skills themselves. Each skill in [src/jcomit/skills.py](src/jcomit/skills.py) declares the network access it needs, and [src/jcomit/policy.py](src/jcomit/policy.py) turns the approved declarations into the OpenShell policy. Approving a skill adds exactly one section to that policy.
 
-# 2. Prove the sandbox only reaches Token Factory
-docker compose exec app python scripts/check_egress.py
-```
-
-## Skills and the sandbox policy
-
-The agent's tools are skills ([src/jcomit/skills.py](src/jcomit/skills.py)). Each declares the network access it needs, and the OpenShell policy is generated from those declarations ([src/jcomit/policy.py](src/jcomit/policy.py)), so a skill reaches only what it declared and the user approved:
-
-| Skill | Approved | Declares |
+| Skill | Approved | Declared access |
 |---|---|---|
-| `categorize` | yes | `POST api.tokenfactory.nebius.com/v1/chat/completions` |
-| `monthly_review` | yes | `POST api.tokenfactory.nebius.com/v1/chat/completions` |
-| `share_report` | no | `POST example.com/upload` |
+| `categorize` | Yes | `POST api.tokenfactory.nebius.com/v1/chat/completions` |
+| `monthly_review` | Yes | `POST api.tokenfactory.nebius.com/v1/chat/completions` |
+| `share_report` | No | `POST example.com/upload` |
 
-The code is baked into the sandbox image read-only at `/app`; only `/sandbox/data` is writable.
+**NVIDIA NemoClaw** installs OpenShell and the agent runtime. Its onboarding step needs systemd to supervise the OpenShell gateway, and GitHub Codespaces has no systemd. We therefore installed NemoClaw with onboarding deferred, started the gateway ourselves ([openshell/start-gateway.sh](openshell/start-gateway.sh)) and ran our own Python skills inside the OpenShell sandbox in place of OpenClaw skills.
+
+## Sandbox rules
+
+[scripts/check_sandbox_rules.sh](scripts/check_sandbox_rules.sh) tests every rule from inside the sandbox and repeats the blocked upload 10 times. Current result:
+
+| Check | Expected | Result |
+|---|---|---|
+| Write inside `/sandbox/data` | Allow | Pass |
+| Write elsewhere in the home folder | Deny | Pass |
+| Change the code in `/app` | Deny | Pass |
+| Write to `/etc` | Deny | Pass |
+| Python calls Token Factory | Allow | Pass |
+| curl calls Token Factory (wrong program) | Deny | Pass |
+| Python calls webhook.site | Deny | Pass |
+| `share_report` uploads the report | Deny | Blocked 10 of 10 |
+
+[scripts/demo_policy_flip.sh](scripts/demo_policy_flip.sh) shows the policy changing on a live sandbox. The upload is blocked under the default policy. Approving `share_report` adds one policy section, and the same upload goes through. Removing the approval blocks it again.
+
+## Screenshots
+
+Money review: TBA
+
+Privacy: TBA
+
+Sandbox: TBA
+
+## Run it
+
+### Option 1: the live demo
+
+Open [jcomit.streamlit.app](https://jcomit.streamlit.app). It shows a snapshot of a real run inside the sandbox, and the "Try it" box redacts any text you type. Free Streamlit apps sleep when idle, so the first visit can take about 30 seconds.
+
+### Option 2: locally, without the sandbox
+
+Requires Python 3.11 or later.
 
 ```bash
-bash scripts/sandbox_up.sh              # build image, generate policy, attach Token Factory key, upload fake data
-scripts/skill.sh categorize
-scripts/skill.sh monthly_review --month 2026-09
-bash scripts/check_sandbox_rules.sh     # file and network rules + the blocked upload 10 times
-bash scripts/demo_policy_flip.sh        # share_report: blocked -> approve -> sent -> revoke -> blocked
-PYTHONPATH=src python3 -m jcomit.actionlog -o data/action_log.json
+git clone https://github.com/Mehdi-Abidi/JComit.git
+cd JComit
+pip install -r requirements.txt -r app/requirements.txt
+python -m pytest
+streamlit run app/streamlit_app.py
 ```
 
-We originally planned OpenClaw skills, but `nemoclaw onboard` needs systemd, which Codespaces lacks (see below). The skills are plain Python run inside the same NVIDIA OpenShell sandbox and policy engine.
-
-## NVIDIA OpenShell sandbox (GitHub Codespaces)
-
-The agent runs inside an [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell) sandbox with the policy in [openshell/jcomit-policy.yaml](openshell/jcomit-policy.yaml):
-
-- Only Python may reach the model API, and only `POST /v1/chat/completions` and `GET /v1/models`. Any other host, path or program is denied.
-- The API key is attached as an OpenShell provider. Code inside the sandbox only sees a placeholder; OpenShell injects the real key at the network boundary.
-- Every allowed and denied connection is logged with a reason (`openshell logs jcomit`).
-
-Setup in a Codespace (Ubuntu 22.04, see [.devcontainer](.devcontainer)):
+The command line works without a model key for everything except Nemotron:
 
 ```bash
-# Install NemoClaw + OpenShell (onboarding deferred)
-curl -fsSL https://www.nvidia.com/nemoclaw.sh | \
-  NEMOCLAW_NON_INTERACTIVE=1 NEMOCLAW_ACCEPT_THIRD_PARTY_SOFTWARE=1 \
-  NEMOCLAW_AGENT=hermes NEMOCLAW_DEFER_ONBOARDING=1 bash
-export PATH="$HOME/.local/bin:$PATH"
-
-# Codespaces has no systemd, so start the gateway by hand and register it
-bash openshell/start-gateway.sh
-openshell gateway add --local --name local https://127.0.0.1:17670
-
-# Create the sandbox and attach the model key as a provider
-openshell sandbox create --name jcomit --policy openshell/jcomit-policy.yaml --detach
-NVIDIA_API_KEY=... openshell provider create --name nvidia --type nvidia --credential NVIDIA_API_KEY
-openshell sandbox provider attach jcomit nvidia
-
-# Checks
-openshell sandbox upload jcomit scripts/check_openshell_egress.py /tmp/
-openshell sandbox exec -n jcomit --no-tty -- python3 /tmp/check_openshell_egress.py
+PYTHONPATH=src python -m jcomit.cli categorize data/statement.csv --no-ai
+PYTHONPATH=src python -m jcomit.cli correct "STARBUCKS #1234 AUSTIN TX" Work
+PYTHONPATH=src python -m jcomit.cli memory
+PYTHONPATH=src python -m jcomit.finders data/statement.csv
 ```
 
-`nemoclaw onboard` itself needs systemd to supervise the gateway, so it does not complete inside Codespaces.
+To include Nemotron, copy `.env.example` to `.env`, set `NEBIUS_API_KEY`, export it, and drop `--no-ai`.
+
+### Option 3: the full agent in the OpenShell sandbox
+
+Use a GitHub Codespace on this repository. The [dev container](.devcontainer/devcontainer.json) provides Ubuntu 22.04, Docker, Python 3.12 and Node 22.
+
+1. Install NemoClaw and OpenShell with onboarding deferred:
+
+   ```bash
+   curl -fsSL https://www.nvidia.com/nemoclaw.sh | \
+     NEMOCLAW_NON_INTERACTIVE=1 NEMOCLAW_ACCEPT_THIRD_PARTY_SOFTWARE=1 \
+     NEMOCLAW_AGENT=hermes NEMOCLAW_DEFER_ONBOARDING=1 bash
+   export PATH="$HOME/.local/bin:$PATH"
+   ```
+
+2. Start the OpenShell gateway and register it:
+
+   ```bash
+   bash openshell/start-gateway.sh
+   openshell gateway add --local --name local https://127.0.0.1:17670
+   ```
+
+3. Register Token Factory as a provider, so the key stays outside the sandbox:
+
+   ```bash
+   openshell provider profile import --file openshell/nebius-token-factory-profile.yaml
+   NEBIUS_API_KEY=<your key> openshell provider create --name nebius --type nebius-token-factory --credential NEBIUS_API_KEY
+   ```
+
+4. Build the sandbox. This bakes the code into the image, generates the policy from the skills, attaches the provider and uploads the fake data:
+
+   ```bash
+   bash scripts/sandbox_up.sh
+   ```
+
+5. Run the agent and the checks:
+
+   ```bash
+   bash scripts/skill.sh categorize
+   bash scripts/skill.sh monthly_review --month 2026-09
+   bash scripts/check_sandbox_rules.sh
+   bash scripts/demo_policy_flip.sh
+   PYTHONPATH=src python3 -m jcomit.actionlog -o data/action_log.json
+   ```
+
+To show memory surviving a restart, teach a correction, stop and start the sandbox, and categorize again. Starbucks rows then show `Work`, decided by memory:
+
+```bash
+openshell sandbox exec -n jcomit --no-tty -- env PYTHONPATH=/app/src python3 -m jcomit.cli correct "STARBUCKS #1234 AUSTIN TX" Work
+openshell sandbox stop jcomit
+openshell sandbox start jcomit
+bash scripts/skill.sh categorize
+```
+
+`scripts/sandbox_up.sh` rebuilds from scratch and clears the sandbox's data, including saved corrections. Use stop and start when you want to keep them.
+
+A simpler sandbox for machines without OpenShell is in [docker-compose.yml](docker-compose.yml). It puts the app on a network with no internet access and routes all traffic through a proxy that allows only Token Factory ([egress/allowlist.txt](egress/allowlist.txt)).
+
+## Project layout
+
+| Path | What it holds |
+|---|---|
+| [src/jcomit/redact.py](src/jcomit/redact.py) | Redaction: names, accounts, IBANs, cards, SSNs, dates of birth, emails, phones, addresses |
+| [src/jcomit/guard.py](src/jcomit/guard.py) | Last check before the model; blocks any payload with the holder's details |
+| [src/jcomit/categorize.py](src/jcomit/categorize.py) | Memory, rules and Nemotron, in that order |
+| [src/jcomit/memory.py](src/jcomit/memory.py) | Saved corrections in SQLite (`data/memory.db`) |
+| [src/jcomit/finders.py](src/jcomit/finders.py) | Subscriptions and strange charges, no model calls |
+| [src/jcomit/skills.py](src/jcomit/skills.py) | Agent skills with declared network access |
+| [src/jcomit/policy.py](src/jcomit/policy.py) | Generates the OpenShell policy from the skills |
+| [src/jcomit/actionlog.py](src/jcomit/actionlog.py) | Merges skill actions with OpenShell's decisions |
+| [src/jcomit/llm.py](src/jcomit/llm.py) | Token Factory client, standard library only |
+| [app/streamlit_app.py](app/streamlit_app.py) | The web page |
+| [demo/](demo/) | Snapshot of a real sandbox run, shown by the live demo |
+| [data/](data/) | Synthetic statements and receipts, made by [scripts/make_fake_data.py](scripts/make_fake_data.py) |
+| [openshell/](openshell/) | Sandbox image, generated policy, Token Factory provider profile |
+| [docs/](docs/) | Module interfaces, private-detail list, page sketch |
+
+## Tests
+
+177 tests. 176 run anywhere; the page test runs when Streamlit is installed.
+
+| File | Tests | Covers |
+|---|---|---|
+| `test_redact.py` | 93 | Name formats and accents, separators, cards, IBANs, SSNs, dates of birth, traps such as store numbers |
+| `test_finders.py` | 23 | Exactly the planted subscriptions and alerts, plus false positives |
+| `test_categorize.py` | 21 | Rules, memory before rules, one request per shop, the leak guard |
+| `test_guard.py` | 14 | Private values blocked in any spelling, clean payloads allowed |
+| `test_memory.py` | 10 | Merchant keys, corrections surviving a restart |
+| `test_policy.py` | 5 | Default policy reaches only Token Factory, only `data/` is writable |
+| `test_skills.py` | 4 | Skill outputs, the review sending totals only, blocked uploads |
+| `test_work_category.py` | 4 | The user-only Work category |
+| `test_actionlog.py` | 2 | Parsing real OpenShell log lines |
+| `test_app.py` | 1 | The page renders the demo snapshot |
+
+## Known limitations
+
+- The redactor finds names by value or by a cue such as "Zelle to". A name with neither is not caught; the leak guard then blocks the payload if it is the account holder.
+- The live demo shows a recorded run. The sandbox itself runs in Codespaces or on any Linux host with Docker and OpenShell.
+- In Codespaces the OpenShell gateway has to be started by hand after the Codespace wakes up, because there is no systemd.
+- All data is synthetic. JComit has not been tested on real bank exports.
+
+## Team
+
+| Member | Work |
+|---|---|
+| S. M. Mehdi Abidi ([@Mehdi-Abidi](https://github.com/Mehdi-Abidi)) | Sandbox and policy, categorizer, memory, leak guard, skills, action log, web page |
+| Ali Soban ([@ali-soban](https://github.com/ali-soban)) | Synthetic data, redaction and its three hardening rounds, first version of the web page |
+| Mufeed Haider ([@MufeedHaider](https://github.com/MufeedHaider)) | Subscription and alert finders, Work category, testing, demo video |
+| Taha Zaidi ([@taha-zaidii](https://github.com/taha-zaidii)) | Screenshots and demo recording |
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

@@ -14,10 +14,14 @@ from . import guard
 from .memory import Memory, merchant_key
 from .statement import Transaction
 
-CATEGORIES = (
+MODEL_CATEGORIES = (
     "Housing", "Income", "Groceries", "Dining", "Transport", "Shopping", "Entertainment",
     "Health", "Fitness", "Travel", "Bills", "Fees", "Transfers", "Other",
 )
+# Only the user can pick these, by teaching memory ("Starbucks is a work expense").
+# The model isn't offered them: it can't know which coffee was for work.
+USER_ONLY_CATEGORIES = ("Work",)
+CATEGORIES = MODEL_CATEGORIES + USER_ONLY_CATEGORIES
 
 # First match wins, so specific patterns go before general ones.
 RULES = [(re.compile(p), c) for p, c in [
@@ -40,7 +44,7 @@ SYSTEM = (
     "'id. description | amount' where a negative amount is money going out. Private details were "
     "replaced with labels like [NAME_1]; ignore them. Answer with JSON only, an object mapping every "
     'id to exactly one category, for example {"1": "Dining"}. Allowed categories: '
-    + ", ".join(CATEGORIES) + ". Use Other when unsure."
+    + ", ".join(MODEL_CATEGORIES) + ". Use Other when unsure."
 )
 
 Redact = Callable[[str], str]

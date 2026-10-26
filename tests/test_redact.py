@@ -229,3 +229,12 @@ def test_fuzzed_spellings_of_known_values_never_leak():
         acct = rng.choice([" ", "-", ".", ""]).join(["4421", "9987"])
         out = Redactor(known=KNOWN).redact(f"X {name} Y {acct} Z")
         assert "AHMED" not in out.upper() and "9987" not in out, out
+
+
+@pytest.mark.parametrize("email", ["sara.ahmed@example.com", "SaraAhmed@bank.com", "ahmed.s@work.co"])
+def test_email_with_the_holders_name_is_hidden_whole(email):
+    r = Redactor(known=["Sara Ahmed", "4421 9987", "5521"])
+    out = r.redact(f"Customer: Sara Ahmed | Email: {email}")
+    assert out.endswith("Email: [EMAIL_1]")
+    assert "@" not in out
+    assert r.mapping["[EMAIL_1]"] == email

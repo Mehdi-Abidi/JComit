@@ -224,11 +224,11 @@ A simpler sandbox for machines without OpenShell is in [docker-compose.yml](dock
 
 ## Tests
 
-177 tests. 176 run anywhere; the page test runs when Streamlit is installed.
+180 tests. 179 run anywhere; the page test runs when Streamlit is installed.
 
 | File | Tests | Covers |
 |---|---|---|
-| `test_redact.py` | 93 | Name formats and accents, separators, cards, IBANs, SSNs, dates of birth, traps such as store numbers |
+| `test_redact.py` | 96 | Name formats and accents, separators, cards, IBANs, SSNs, dates of birth, traps such as store numbers |
 | `test_finders.py` | 23 | Exactly the planted subscriptions and alerts, plus false positives |
 | `test_categorize.py` | 21 | Rules, memory before rules, one request per shop, the leak guard |
 | `test_guard.py` | 14 | Private values blocked in any spelling, clean payloads allowed |

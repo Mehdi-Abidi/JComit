@@ -93,9 +93,9 @@ class Redactor:
 
     def redact(self, text: str) -> str:
         text = _clean(text)
+        text = _EMAIL.sub(lambda m: self._label("EMAIL", m.group()), text)
         for kind, pat, value in self._known:
             text = pat.sub(lambda m, k=kind, v=value: self._label(k, v if k == "NAME" else m.group()), text)
-        text = _EMAIL.sub(lambda m: self._label("EMAIL", m.group()), text)
         text = _GROUPED.sub(lambda m: self._label("CARD" if len(re.sub(r"\D", "", m.group())) == 16 else "ACCT", m.group()), text)
         text = _AMEX.sub(lambda m: self._label("CARD", m.group()), text)
         text = _PLAIN_CARD.sub(lambda m: self._label("CARD", m.group()) if _luhn(m.group()) else m.group(), text)

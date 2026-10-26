@@ -31,7 +31,7 @@ JComit keeps the statement on your machine. The model sees shop names and labels
 
 ## What JComit does
 
-- **Hides private details** before anything leaves the machine: names, account numbers, card numbers, emails, phone numbers and addresses become labels such as `[NAME_1]` and `[ACCT_1]`.
+- **Hides private details** before anything leaves the machine. Names, account numbers, IBANs, card numbers, Social Security numbers, dates of birth, emails, phone numbers and addresses become labels such as `[NAME_1]` and `[ACCT_1]`.
 - **Sorts spending into categories.** Simple rules handle common shops. Nemotron handles the rest.
 - **Finds subscriptions and strange charges.** On the demo statement it finds 4 subscriptions ($69.47 a month) and 3 alerts: a $1,899 purchase, a double Amazon charge and a first-time hotel abroad.
 - **Writes a monthly review** with Nemotron, from category totals only.
@@ -52,7 +52,7 @@ JComit keeps the statement on your machine. The model sees shop names and labels
               v
  +--------------------------+
  | 2. Redaction             |      redact.py: names, accounts, cards,
- |                          |      emails, phones, addresses -> labels
+ |                          |      IDs, contact details -> labels
  +--------------------------+
               v
  +--------------------------+
@@ -207,7 +207,7 @@ A simpler sandbox for machines without OpenShell is in [docker-compose.yml](dock
 
 | Path | What it holds |
 |---|---|
-| [src/jcomit/redact.py](src/jcomit/redact.py) | Redaction: names, accounts, cards, emails, phones, addresses |
+| [src/jcomit/redact.py](src/jcomit/redact.py) | Redaction: names, accounts, IBANs, cards, SSNs, dates of birth, emails, phones, addresses |
 | [src/jcomit/guard.py](src/jcomit/guard.py) | Last check before the model; blocks any payload with the holder's details |
 | [src/jcomit/categorize.py](src/jcomit/categorize.py) | Memory, rules and Nemotron, in that order |
 | [src/jcomit/memory.py](src/jcomit/memory.py) | Saved corrections in SQLite (`data/memory.db`) |
@@ -224,11 +224,11 @@ A simpler sandbox for machines without OpenShell is in [docker-compose.yml](dock
 
 ## Tests
 
-152 tests. 151 run anywhere; the page test runs when Streamlit is installed.
+177 tests. 176 run anywhere; the page test runs when Streamlit is installed.
 
 | File | Tests | Covers |
 |---|---|---|
-| `test_redact.py` | 68 | Name formats, separators, card numbers, traps such as store numbers |
+| `test_redact.py` | 93 | Name formats and accents, separators, cards, IBANs, SSNs, dates of birth, traps such as store numbers |
 | `test_finders.py` | 23 | Exactly the planted subscriptions and alerts, plus false positives |
 | `test_categorize.py` | 21 | Rules, memory before rules, one request per shop, the leak guard |
 | `test_guard.py` | 14 | Private values blocked in any spelling, clean payloads allowed |
@@ -251,7 +251,7 @@ A simpler sandbox for machines without OpenShell is in [docker-compose.yml](dock
 | Member | Work |
 |---|---|
 | S. M. Mehdi Abidi ([@Mehdi-Abidi](https://github.com/Mehdi-Abidi)) | Sandbox and policy, categorizer, memory, leak guard, skills, action log, web page |
-| Ali Soban ([@ali-soban](https://github.com/ali-soban)) | Synthetic data, redaction, first version of the web page |
+| Ali Soban ([@ali-soban](https://github.com/ali-soban)) | Synthetic data, redaction and its three hardening rounds, first version of the web page |
 | Mufeed Haider ([@MufeedHaider](https://github.com/MufeedHaider)) | Subscription and alert finders, Work category, testing, demo video |
 | Taha Zaidi ([@taha-zaidii](https://github.com/taha-zaidii)) | Screenshots and demo recording |
 

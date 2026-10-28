@@ -3,7 +3,7 @@
 JComit is a private personal-finance agent. It reads your bank statements and receipts on your own machine, strips out names, account numbers and card numbers, and only then asks NVIDIA Nemotron for help. The agent runs inside an NVIDIA OpenShell sandbox that can reach Nebius Token Factory and nothing else.
 
 **Live demo:** [jcomit.streamlit.app](https://jcomit.streamlit.app)
-**Demo video:** TBA
+**Demo video:** [youtu.be/YVB7yawzkAQ](https://youtu.be/YVB7yawzkAQ)
 **Devpost:** TBA
 
 Built for the Nebius x NVIDIA Global AI Hackathon 2026, Personal AI track. All data in this repository is synthetic.
@@ -112,11 +112,17 @@ The policy is generated from the skills themselves. Each skill in [src/jcomit/sk
 
 ## Screenshots
 
-Money review: TBA
+**Money review.** Nemotron's monthly review, the three alerts, spending by category and the subscriptions it found.
 
-Privacy: TBA
+![Money review tab](docs/screenshots/money-review.png)
 
-Sandbox: TBA
+**Privacy.** Each private value and the label that replaces it, and the statement rows that mention other people.
+
+![Privacy tab](docs/screenshots/privacy.png)
+
+**Sandbox.** What each skill may reach, the same upload blocked, allowed and blocked again, and the action log.
+
+![Sandbox tab](docs/screenshots/sandbox.png)
 
 ## Run it
 

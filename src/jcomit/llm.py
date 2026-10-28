@@ -49,8 +49,8 @@ def models() -> list[str]:
     return sorted(m["id"] for m in _request("/models")["data"])
 
 
-def chat(prompt: str, system: str | None = None, max_tokens: int = 4000, temperature: float = 0.0) -> str:
-    """One chat completion. Nemotron reasons before answering, so leave room in max_tokens."""
+def complete(prompt: str, system: str | None = None, max_tokens: int = 4000,
+             temperature: float = 0.0) -> tuple[str, dict]:
     messages = [{"role": "system", "content": system}] if system else []
     messages.append({"role": "user", "content": prompt})
     out = _request("/chat/completions", {
@@ -59,4 +59,9 @@ def chat(prompt: str, system: str | None = None, max_tokens: int = 4000, tempera
         "max_tokens": max_tokens,
         "temperature": temperature,
     })
-    return (out["choices"][0]["message"]["content"] or "").strip()
+    return (out["choices"][0]["message"]["content"] or "").strip(), out.get("usage") or {}
+
+
+def chat(prompt: str, system: str | None = None, max_tokens: int = 4000, temperature: float = 0.0) -> str:
+    """One chat completion. Nemotron reasons before answering, so leave room in max_tokens."""
+    return complete(prompt, system, max_tokens, temperature)[0]

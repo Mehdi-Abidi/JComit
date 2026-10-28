@@ -8,12 +8,12 @@
     "Dining": 707.45,
     "Travel": 596.4,
     "Groceries": 570.68,
-    "Bills": 179.9,
+    "Bills": 182.89,
     "Transport": 122.97,
     "Health": 59.39,
     "Fitness": 39.0,
     "Entertainment": 27.48,
-    "Other": 26.49,
+    "Other": 23.5,
     "Fees": 9.37
   },
   "subscriptions": [
@@ -54,5 +54,5 @@
       "date": "2026-09-26"
     }
   ],
-  "review": "In September 2026 you earned $4,200 but spent $6,068.06, leaving a shortfall of about $1,868. Your biggest expense was Shopping at $2,278.93, followed by Housing and Dining. You have four recurring subscriptions\u2014IRONWORKS GYM ($39), Netflix ($15.49), Spotify ($11.99) and CloudVault Storage ($2.99). Worth a quick look are the alerts: a possible duplicate Amazon charge of $84.37, a large Best\u202fBuy purchase of $1,899 on Sep\u202f14, and a new hotel stay in Lisbon for $312.40 on Sep\u202f26."
+  "review": "In September 2026 your income was $4,200 and your total spending came to $6,068.06. The largest spending category was Shopping at $2,278.93, followed by Housing ($1,450) and Dining ($707.45). You have four recurring subscriptions: Ironworks Gym ($39.00), Netflix ($15.49), Spotify ($11.99) and CloudVault Storage ($2.99). Review the alerts: a possible duplicate Amazon charge of $84.37 from August\u202f19, a large Best Buy purchase of $1,899.00 on September\u202f14, and a new hotel stay in Lisbon for $312.40 on September\u202f26."
 }

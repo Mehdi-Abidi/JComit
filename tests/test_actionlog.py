@@ -34,3 +34,17 @@ def test_timeline_merges_skill_and_sandbox_events_in_order():
     merged = timeline(parse_openshell(LOGS), skills)
     assert [e["time"] for e in merged] == sorted(e["time"] for e in merged)
     assert any(e["source"] == "skill" for e in merged)
+
+
+def test_since_accepts_short_durations():
+    from datetime import timedelta
+
+    import pytest
+
+    from jcomit.actionlog import since_delta
+
+    assert since_delta("90s") == timedelta(seconds=90)
+    assert since_delta("5m") == timedelta(minutes=5)
+    assert since_delta("2h") == timedelta(hours=2)
+    with pytest.raises(ValueError):
+        since_delta("soon")

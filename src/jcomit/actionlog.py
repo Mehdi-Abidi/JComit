@@ -13,7 +13,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
@@ -84,7 +84,15 @@ def fetch(sandbox: str, since: str) -> list[dict]:
         )
         path = Path(tmp) / "actions.jsonl"
         skills = parse_skills(path.read_text(encoding="utf-8").splitlines()) if path.exists() else []
-    return timeline(parse_openshell(logs), skills)
+    cutoff = (datetime.now(timezone.utc) - since_delta(since)).isoformat(timespec="seconds")
+    return [e for e in timeline(parse_openshell(logs), skills) if e["time"] >= cutoff]
+
+
+def since_delta(since: str) -> timedelta:
+    m = re.fullmatch(r"(\d+)([smhd])", since.strip())
+    if not m:
+        raise ValueError(f"use a duration like 90s, 5m or 2h, not {since!r}")
+    return timedelta(**{{"s": "seconds", "m": "minutes", "h": "hours", "d": "days"}[m[2]]: int(m[1])})
 
 
 def main(argv: list[str] | None = None) -> int:

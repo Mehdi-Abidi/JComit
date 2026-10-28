@@ -49,6 +49,8 @@ def section_name(host: str, skills: list[str]) -> str:
         return "nebius_token_factory"
     if host == "integrate.api.nvidia.com":
         return "nvidia_backup"
+    if host == "api.tavily.com":
+        return "tavily_search"
     return "skill_" + "_".join(sorted(set(skills)))
 
 

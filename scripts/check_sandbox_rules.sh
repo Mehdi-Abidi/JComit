@@ -19,6 +19,10 @@ expect deny  "change the code in /app"              "touch /app/src/jcomit/.prob
 expect deny  "write to /etc"                        "touch /etc/.probe"
 expect allow "python -> Token Factory models"       "PYTHONPATH=/app/src python3 -c 'from jcomit import llm; llm.models()'"
 expect deny  "curl -> Token Factory (wrong program)" "curl -sf -m 15 https://api.tokenfactory.nebius.com/v1/models"
+expect allow "python -> Tavily search"              "python3 -c 'import urllib.request as u, urllib.error as e
+try: u.urlopen(u.Request(\"https://api.tavily.com/search\", data=b\"{}\", method=\"POST\"), timeout=15)
+except e.HTTPError: pass'"
+expect deny  "curl -> Tavily (wrong program)"       "[ \"\$(curl -s -o /dev/null -w '%{http_code}' -m 15 -X POST https://api.tavily.com/search)\" != 000 ]"
 expect deny  "python -> webhook.site"               "python3 -c \"import urllib.request as u; u.urlopen('https://webhook.site/', timeout=15)\""
 
 blocked=0

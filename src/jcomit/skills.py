@@ -23,11 +23,12 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import guard, statement
+from . import guard, statement, websearch
 from .categorize import categorize, default_redactor
 from .memory import Memory
 
 TOKEN_FACTORY = "api.tokenfactory.nebius.com"
+TAVILY = "api.tavily.com"
 SHARE_URL = os.environ.get("JCOMIT_SHARE_URL", "https://example.com/upload")
 
 
@@ -65,6 +66,10 @@ def _load(files: list[str]) -> list[statement.Transaction]:
     return statement.load(*files) if files else statement.load(data_dir() / "statement.csv")
 
 
+def _lookup():
+    return websearch.search if websearch.available() else None
+
+
 def _write(name: str, payload: dict) -> Path:
     path = data_dir() / name
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
@@ -75,7 +80,8 @@ def _write(name: str, payload: dict) -> Path:
 
 def run_categorize(args) -> dict:
     txns = _load(args.files)
-    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor(txns))
+    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor(txns),
+                        lookup=_lookup())
     sources = Counter(i.source for i in result.items)
     _write("categorized.json", {
         "items": [
@@ -84,10 +90,11 @@ def run_categorize(args) -> dict:
             for i in result.items
         ],
         "sent_to_model": result.sent,
+        "web_lookups": result.searched,
         "blocked": result.blocked,
     })
     log_action("categorize", f"sorted {len(txns)} transactions", "blocked" if result.blocked else "ok",
-               decided_by=dict(sources), sent_to_model=len(result.sent))
+               decided_by=dict(sources), sent_to_model=len(result.sent), web_lookups=len(result.searched))
     return {"transactions": len(txns), "decided_by": dict(sources), "blocked": result.blocked}
 
 
@@ -108,12 +115,8 @@ def _finders():
     return find_subscriptions, find_alerts
 
 
-def run_monthly_review(args, ask=None) -> dict:
-    txns = _load(args.files)
-    month = args.month or max(t.date for t in txns).strftime("%Y-%m")
-    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor(txns))
-    in_month = [i for i in result.items if i.txn.date.strftime("%Y-%m") == month]
-
+def review_month(txns, items, month: str, ask=None) -> dict:
+    in_month = [i for i in items if i.txn.date.strftime("%Y-%m") == month]
     spend = Counter()
     for i in in_month:
         if i.txn.amount < 0 and i.category != "Transfers":
@@ -141,12 +144,18 @@ def run_monthly_review(args, ask=None) -> dict:
     guard.check(prompt, guard.patterns(txns))
     if ask is None:
         from .llm import chat as ask
-    review = ask(prompt, system=REVIEW_SYSTEM)
+    return {**facts, "review": ask(prompt, system=REVIEW_SYSTEM)}
 
-    out = {**facts, "review": review}
+
+def run_monthly_review(args, ask=None) -> dict:
+    txns = _load(args.files)
+    month = args.month or max(t.date for t in txns).strftime("%Y-%m")
+    result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor(txns),
+                        lookup=_lookup())
+    out = review_month(txns, result.items, month, ask)
     _write(f"review_{month}.json", out)
     _write("review_latest.json", out)
-    log_action("monthly_review", f"wrote review for {month}", "ok", finders=bool(finders))
+    log_action("monthly_review", f"wrote review for {month}", "ok", finders=_finders() is not None)
     return out
 
 
@@ -170,10 +179,10 @@ def run_share_report(args) -> dict:
 
 
 SKILLS = {s.name: s for s in [
-    Skill("categorize", "Sort transactions into spending categories (Nemotron for unknown shops).",
-          (Access(TOKEN_FACTORY, "POST", "/v1/chat/completions"),), True, run_categorize),
+    Skill("categorize", "Sort transactions into spending categories (Nemotron for unknown shops, Tavily for shop names it can't place).",
+          (Access(TOKEN_FACTORY, "POST", "/v1/chat/completions"), Access(TAVILY, "POST", "/search")), True, run_categorize),
     Skill("monthly_review", "Summarise one month: spending, subscriptions, alerts, and a short review.",
-          (Access(TOKEN_FACTORY, "POST", "/v1/chat/completions"),), True, run_monthly_review),
+          (Access(TOKEN_FACTORY, "POST", "/v1/chat/completions"), Access(TAVILY, "POST", "/search")), True, run_monthly_review),
     Skill("share_report", "Upload the monthly report to an outside server.",
           (Access(urllib.parse.urlsplit(SHARE_URL).hostname, "POST", urllib.parse.urlsplit(SHARE_URL).path or "/"),),
           False, run_share_report),

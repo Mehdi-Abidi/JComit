@@ -6,11 +6,15 @@
 # without losing memory, use: openshell sandbox stop jcomit && openshell sandbox start jcomit
 set -euo pipefail
 NAME="${NAME:-jcomit}"
-PROVIDERS="${PROVIDERS:-nebius}"
+PROVIDERS="${PROVIDERS:-nebius tavily}"
 export PATH="$HOME/.local/bin:$PATH"
 cd "$(dirname "$0")/.."
 
 bash openshell/start-gateway.sh
+for _ in $(seq 1 30); do
+  openshell provider list >/dev/null 2>&1 && break
+  sleep 2
+done
 
 ctx="$(mktemp -d)"
 cp -r src "$ctx/src"
@@ -20,7 +24,13 @@ PYTHONPATH=src python3 -m jcomit.policy -o "$ctx/policy.yaml"
 
 openshell sandbox delete "$NAME" >/dev/null 2>&1 || true
 provider_flags=()
-for p in $PROVIDERS; do provider_flags+=(--provider "$p"); done
+for p in $PROVIDERS; do
+  if openshell provider get "$p" >/dev/null 2>&1; then
+    provider_flags+=(--provider "$p")
+  else
+    echo "Provider $p is not registered; skipping it."
+  fi
+done
 openshell sandbox create --name "$NAME" --from "$ctx" --policy "$ctx/policy.yaml" "${provider_flags[@]}" --detach
 
 for _ in $(seq 1 60); do

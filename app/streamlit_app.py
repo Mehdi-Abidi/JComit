@@ -4,9 +4,10 @@ Results come from data/ when the skills have run next to this page (live), and
 from demo/ otherwise: a snapshot of a real run inside the OpenShell sandbox.
 """
 import json
+import os
 import sys
 from collections import Counter
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 # Load pyarrow fully before anything else. Streamlit imports it lazily on another
@@ -21,11 +22,23 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
+from jcomit import live as agent  # noqa: E402
 from jcomit import statement  # noqa: E402
-from jcomit.categorize import default_redactor  # noqa: E402
+from jcomit.categorize import CATEGORIES, default_redactor  # noqa: E402
 from jcomit.skills import SKILLS  # noqa: E402
 
 st.set_page_config(page_title="JComit", page_icon=":material/lock:", layout="wide")
+
+for key in ("NEBIUS_API_KEY", "TAVILY_API_KEY"):
+    try:
+        if not os.environ.get(key) and key in st.secrets:
+            os.environ[key] = str(st.secrets[key])
+    except Exception:
+        pass
+
+RUNS_PER_VISITOR = 5
+RUNS_PER_DAY = 300
+MAX_UPLOAD_BYTES = 200_000
 
 ALERT_LABELS = {"large": "Very large charge", "double": "Charged twice", "new_abroad": "New shop abroad"}
 
@@ -80,6 +93,7 @@ st.markdown(
     ":blue-badge[:material/shield: NVIDIA OpenShell sandbox] "
     ":gray-badge[:material/science: All data is fake]"
 )
+st.caption("Start here: run the agent, then open Privacy and try the redaction box, then Sandbox.")
 
 k1, k2, k3, k4 = st.columns(4)
 k1.metric(f"Spent in {month_name}", money(review.get("spending_total", 0), cents=False), border=True)
@@ -87,11 +101,152 @@ k2.metric("Subscriptions", f"{money(-sum(s['amount'] for s in subs))}/mo", borde
 k3.metric("Alerts", len(alerts), border=True)
 k4.metric("Stopped by the sandbox", len(stopped), border=True)
 
-money_tab, privacy_tab, sandbox_tab = st.tabs([
+run_tab, money_tab, privacy_tab, sandbox_tab = st.tabs([
+    ":material/play_circle: Run the agent",
     ":material/bar_chart: Money review",
     ":material/visibility_off: Privacy",
     ":material/shield: Sandbox",
 ])
+
+@st.cache_resource
+def daily_runs() -> dict:
+    return {"day": "", "runs": 0}
+
+
+@st.cache_data(ttl=3600, show_spinner=False, max_entries=50)
+def run_cached(csv_text: str, corrections: tuple) -> dict:
+    return agent.run_agent(csv_text, dict(corrections))
+
+
+def take_run() -> str | None:
+    counter = daily_runs()
+    today = date.today().isoformat()
+    if counter["day"] != today:
+        counter.update(day=today, runs=0)
+    if st.session_state.runs >= RUNS_PER_VISITOR:
+        return f"You have used your {RUNS_PER_VISITOR} live runs for this visit. Reload the page to start a new visit."
+    if counter["runs"] >= RUNS_PER_DAY:
+        return "Today's live runs are used up. The other tabs show a recorded run."
+    counter["runs"] += 1
+    st.session_state.runs += 1
+    return None
+
+
+st.session_state.setdefault("runs", 0)
+st.session_state.setdefault("corrections", {})
+
+with run_tab:
+    st.markdown("**Run the real agent on a statement.** It hides private details, sorts spending with rules, "
+                "asks Nemotron 3 Super on Nebius Token Factory about the shops it doesn't know, looks up shop "
+                "names Nemotron can't place with Tavily, finds subscriptions and odd charges, and writes a review.")
+    can_run = bool(os.environ.get("NEBIUS_API_KEY"))
+    if not can_run:
+        st.info("Live runs are switched off on this copy of the page. The other tabs show a recorded run.")
+
+    source = st.radio("Statement", ["Sample statement (fake)", "Upload a CSV"], horizontal=True,
+                      label_visibility="collapsed")
+    csv_text = None
+    if source == "Upload a CSV":
+        st.caption("Columns: " + ", ".join(statement.COLUMNS) + ". Use fake data. "
+                   "Uploads are not stored; only redacted text and shop names leave this page.")
+        upload = st.file_uploader("Statement CSV", type="csv", label_visibility="collapsed")
+        if upload is not None:
+            if upload.size > MAX_UPLOAD_BYTES:
+                st.error("That file is over 200 KB. Please upload a smaller statement.")
+            else:
+                csv_text = upload.getvalue().decode("utf-8", errors="replace")
+    else:
+        csv_text = (ROOT / "data" / "statement.csv").read_text(encoding="utf-8")
+
+    taught = st.session_state.corrections
+    label = "Run the agent"
+    if taught:
+        label += f" with {len(taught)} saved correction{'s' if len(taught) > 1 else ''}"
+    if st.button(label, type="primary", disabled=not (can_run and csv_text), key="run"):
+        problem = take_run()
+        if problem:
+            st.warning(problem)
+        else:
+            with st.spinner("Nemotron is working..."):
+                try:
+                    st.session_state.live = run_cached(csv_text, tuple(sorted(taught.items())))
+                except Exception as e:
+                    st.session_state.live = {"error": str(e)}
+
+    res = st.session_state.get("live")
+    if res and res.get("error"):
+        st.error(f"The run did not finish: {res['error']}")
+    elif res:
+        d = res["decided_by"]
+        local = d.get("rule", 0) + d.get("memory", 0)
+        looked = len(res["searched"])
+        placed = sum(1 for s in res["searched"] if s["category"] != "Other")
+        steps = [
+            f"Hid {res['hidden']} private values (names, account and card numbers, contact details) behind labels.",
+            f"Rules and your saved corrections sorted {local} of {res['rows']} transactions"
+            + (f", {d['memory']} of them from memory." if d.get("memory") else "."),
+            "Leak guard checked every request before it left: " + ("blocked." if res["blocked"] else "passed."),
+            f"Nemotron 3 Super sorted {len(res['sent'])} shops the rules didn't know, in one request.",
+            (f"Tavily looked up {looked} shop name{'s' if looked != 1 else ''} Nemotron couldn't place: "
+             f"{placed} now {'has' if placed == 1 else 'have'} a category"
+             + (f", {looked - placed} stayed Other because the web results weren't clear." if looked - placed else ".")
+             if res["web"] and looked else
+             "No shops needed a Tavily web lookup this time." if res["web"] else
+             "Tavily lookup is off on this copy of the page."),
+            "Nemotron wrote the monthly review from totals only." if res["review"] else "No review: the run was blocked.",
+        ]
+        with st.container(border=True):
+            for n, s in enumerate(steps, 1):
+                icon = ":gray[:material/remove:]" if "is off" in s else ":green[:material/check:]"
+                st.markdown(f"{icon} {n}. {s}")
+            st.caption(f"{res['usage']['calls']} model calls, {res['usage']['tokens']:,} tokens, {res['seconds']} s. "
+                       f"Ran at {res['ran_at']}; the same statement reuses its result for an hour.")
+        st.caption("This live run uses the agent's own code, outside the sandbox. "
+                   "The Sandbox tab and the demo video show it running inside NVIDIA OpenShell.")
+
+        rv = res["review"]
+        if rv:
+            left, right = st.columns([5, 4], gap="large")
+            with left:
+                with st.container(border=True):
+                    st.markdown(f"**Nemotron's review of {datetime.strptime(rv['month'], '%Y-%m').strftime('%B %Y')}**")
+                    st.markdown(esc(rv["review"]))
+                for a in rv.get("alerts", []):
+                    st.markdown(esc(f":orange[:material/warning:] **{ALERT_LABELS.get(a['type'], a['type'])}**: "
+                                    f"{a['merchant']}, {money(-a['amount'])} on {a['date']}"))
+            with right:
+                st.markdown("**What Nemotron was sent**")
+                st.dataframe([{"Original": s["original"], "Sent": s["redacted"]} for s in res["sent"]],
+                             hide_index=True, width="stretch", height=240)
+                st.caption("Only shop names the rules didn't know, plus the amount. Rows that name people, "
+                           "like Zelle transfers, are sorted by rules and never sent; any that were would "
+                           "go out redacted.")
+                if res["searched"]:
+                    st.markdown("**Tavily web lookups**")
+                    st.dataframe([{"Searched": s["query"], "Now": s["category"],
+                                   "Found": s["hint"][:90] + ("..." if len(s["hint"]) > 90 else "")}
+                                  for s in res["searched"]], hide_index=True, width="stretch")
+
+        st.markdown("**Teach it.** Pick a shop and the category it should be. Run again and those rows "
+                    "are decided by memory instead of the model.")
+        shops = sorted({i["description"] for i in res["items"]})
+        default = shops.index("SQ *BLUE DOOR LLC") if "SQ *BLUE DOOR LLC" in shops else 0
+        a, b, c = st.columns([3, 2, 1], vertical_alignment="bottom")
+        shop = a.selectbox("Shop", shops, index=default)
+        category = b.selectbox("Category", CATEGORIES, index=CATEGORIES.index("Dining"))
+        if c.button("Remember", key="remember"):
+            taught[shop] = category
+            st.success(f"Saved: {shop} is {category}. Press Run again.")
+        if taught:
+            st.caption("Saved this visit: " + "; ".join(f"{k} = {v}" for k, v in taught.items()))
+
+        with st.expander(f"All {res['rows']} transactions and who decided each"):
+            st.dataframe(
+                [{"Date": i["date"], "Shop": i["description"], "Amount": i["amount"],
+                  "Category": i["category"], "Decided by": i["source"]} for i in res["items"]],
+                hide_index=True, width="stretch",
+                column_config={"Amount": st.column_config.NumberColumn(format="$%.2f")},
+            )
 
 # --- money review -----------------------------------------------------------------
 
@@ -122,14 +277,14 @@ with money_tab:
                     tooltip=["category:N", alt.Tooltip("spent:Q", format="$,.2f")],
                 )
                 .properties(height=26 * len(spend) + 20),
-                use_container_width=True,
+                width="stretch",
             )
         if subs:
             total = -sum(s["amount"] for s in subs)
             st.markdown(esc(f"**Subscriptions** · {money(total)} a month, {money(total * 12)} a year"))
             st.dataframe(
                 [{"Shop": s["merchant"], "Monthly": money(-s["amount"])} for s in subs],
-                hide_index=True, use_container_width=True,
+                hide_index=True, width="stretch",
             )
 
     items = categorized["items"]
@@ -139,7 +294,7 @@ with money_tab:
             st.dataframe(
                 [{"Date": i["date"], "Shop": i["description"], "Amount": i["amount"],
                   "Category": i["category"], "Decided by": i["source"]} for i in items],
-                hide_index=True, use_container_width=True,
+                hide_index=True, width="stretch",
                 column_config={"Amount": st.column_config.NumberColumn(format="$%.2f")},
             )
 
@@ -181,11 +336,11 @@ with privacy_tab:
             st.dataframe(
                 [{"Label": k, "Real value (stays here)": redact.mapping[k]}
                  for k in sorted(redact.mapping, key=label_order)],
-                hide_index=True, use_container_width=True,
+                hide_index=True, width="stretch",
             )
         with b:
             st.markdown("**Rows that mention people or accounts**")
-            st.dataframe(changed, hide_index=True, use_container_width=True)
+            st.dataframe(changed, hide_index=True, width="stretch")
             st.caption("Every row also carries the holder's name, account and card. They are replaced the same way.")
 
     with receipts_tab:
@@ -202,7 +357,7 @@ with privacy_tab:
         st.caption("Rules sort the common shops. Only the ones they don't know go to Nemotron, once each.")
         st.dataframe(
             [{"Original": s["original"], "Sent to Nemotron": s["redacted"]} for s in categorized["sent_to_model"]],
-            hide_index=True, use_container_width=True,
+            hide_index=True, width="stretch",
         )
 
     with try_tab:
@@ -221,7 +376,7 @@ with sandbox_tab:
               "Status": "Approved" if s.approved else "Not approved",
               "Network": ", ".join(f"{a.method} {a.host}{a.path}" for a in s.network)}
              for s in SKILLS.values()],
-            hide_index=True, use_container_width=True,
+            hide_index=True, width="stretch",
         )
         st.caption("The sandbox policy is generated from these declarations. "
                    "Files: code is read-only, only data/ is writable.")
@@ -248,14 +403,14 @@ with sandbox_tab:
             "What": e.get("action") or e.get("target") or "",
             "Why": e.get("reason") or e.get("detail") or (f"policy {e['policy']}" if e.get("policy") else ""),
         } for e in shown],
-        hide_index=True, use_container_width=True,
+        hide_index=True, width="stretch",
         column_config={"Result": st.column_config.TextColumn(width="small"),
                        "Time": st.column_config.TextColumn(width="small")},
     )
 
 st.divider()
 st.caption(
-    ("Live results from this machine." if live else
-     "Results are a snapshot of a real run inside the NVIDIA OpenShell sandbox.")
+    ("Money review, Privacy and Sandbox show live results from this machine." if live else
+     "Money review, Privacy and Sandbox show a recorded run inside the NVIDIA OpenShell sandbox.")
     + " Source: [github.com/Mehdi-Abidi/JComit](https://github.com/Mehdi-Abidi/JComit)"
 )

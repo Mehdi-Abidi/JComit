@@ -1066,5 +1066,12 @@
       "redacted": "TERRA TOYS AUSTIN TX"
     }
   ],
+  "web_lookups": [
+    {
+      "query": "BLUE DOOR",
+      "hint": "Blue Door is described as an award-winning creative business consultancy that partners with world-leading brands, academics, NGOs, and governments to provide strategic and creative solutions across various challenges. Another source describ",
+      "category": "Other"
+    }
+  ],
   "blocked": null
 }

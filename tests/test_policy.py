@@ -9,13 +9,18 @@ def section(policy: str, name: str) -> str:
     return policy[start:end if end >= 0 else None]
 
 
-def test_default_policy_only_reaches_token_factory():
+def test_default_policy_only_reaches_token_factory_and_tavily():
     p = build()
-    assert "host: api.tokenfactory.nebius.com" in p
+    assert sorted(line.split("host: ")[1] for line in p.splitlines() if "host: " in line) == [
+        "api.tavily.com", "api.tokenfactory.nebius.com",
+    ]
     assert 'method: POST, path: "/v1/chat/completions"' in p
     assert "example.com" not in p
     assert "integrate.api.nvidia.com" not in p
     assert "used by: categorize, monthly_review" in section(p, "nebius_token_factory")
+    tavily = section(p, "tavily_search")
+    assert 'method: POST, path: "/search"' in tavily
+    assert "GET" not in tavily
 
 
 def test_only_data_is_writable():

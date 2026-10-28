@@ -62,6 +62,10 @@ class Result:
     items: list[Item]
     sent: list[dict] = field(default_factory=list)  # {"original", "redacted"}, what the model saw
     blocked: str | None = None
+    searched: list[dict] = field(default_factory=list)
+
+
+Lookup = Callable[[str], str]
 
 
 def rule_category(description: str) -> str | None:
@@ -109,6 +113,45 @@ def parse_answer(text: str, ids: list[str]) -> dict[str, str]:
     }
 
 
+def _look_up_unsure(txns, items, pending, redact, ask, lookup, private, result) -> None:
+    from .websearch import shop_query
+
+    unsure = [ps for ps in pending.values() if items[ps[0]] and items[ps[0]].category == "Other"]
+    lines, found = [], []
+    for positions in unsure:
+        t = txns[positions[0]]
+        red = redact(t.description)
+        query = shop_query(red)
+        if not query:
+            continue
+        try:
+            guard.check(query, private)
+            hint = lookup(query)
+            guard.check(hint, private)
+        except Exception:
+            continue
+        if not hint:
+            continue
+        gid = str(len(found) + 1)
+        found.append((gid, positions, query, hint))
+        lines.append(f"{gid}. {red} | {t.amount:+.2f} | web: {hint}")
+    if not lines:
+        return
+    prompt = "\n".join(lines)
+    try:
+        guard.check(prompt, private)
+    except guard.LeakError:
+        return
+    answer = parse_answer(ask(prompt, system=SYSTEM + " Lines may end with web search snippets about the shop; use them."),
+                          [f[0] for f in found])
+    for gid, positions, query, hint in found:
+        category = answer.get(gid, "Other")
+        result.searched.append({"query": query, "hint": hint[:240], "category": category})
+        if category != "Other":
+            for p in positions:
+                items[p] = Item(txns[p], category, "nemotron+web")
+
+
 def categorize(
     txns: list[Transaction],
     memory: Memory | None = None,
@@ -116,6 +159,7 @@ def categorize(
     ask: Ask | None = None,
     use_ai: bool = True,
     batch_size: int = 40,
+    lookup: Lookup | None = None,
 ) -> Result:
     items: list[Item | None] = []
     pending: dict[str, list[int]] = {}  # merchant key -> item positions
@@ -154,6 +198,9 @@ def categorize(
             for gid, positions in zip(ids, batch):
                 for p in positions:
                     items[p] = Item(txns[p], answer.get(gid, "Other"), "nemotron")
+
+        if lookup and not result.blocked:
+            _look_up_unsure(txns, items, pending, redact, ask, lookup, private, result)
 
     source = "blocked" if result.blocked else "unreviewed"
     result.items = [it or Item(txns[i], "Other", source) for i, it in enumerate(items)]

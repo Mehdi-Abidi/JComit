@@ -1,0 +1,21 @@
+id: tavily
+display_name: Tavily
+description: Tavily web search for AI agents
+category: other
+credentials:
+- name: api_key
+  description: Tavily API key
+  env_vars:
+  - TAVILY_API_KEY
+  required: true
+  auth_style: bearer
+  header_name: authorization
+  query_param: ''
+endpoints:
+- host: api.tavily.com
+  port: 443
+  protocol: rest
+  access: read-write
+  enforcement: enforce
+binaries: []
+inference_capable: false

@@ -381,15 +381,18 @@ with sandbox_tab:
     left, right = st.columns([1, 1], gap="large")
     with left:
         st.markdown("**What each skill may reach**")
+        services = {"api.tokenfactory.nebius.com": "Nebius Token Factory", "api.tavily.com": "Tavily"}
         st.dataframe(
             [{"Skill": s.name,
               "Status": "Approved" if s.approved else "Not approved",
-              "Network": ", ".join(f"{a.method} {a.host}{a.path}" for a in s.network)}
+              "May reach": ", ".join(f"{services.get(a.host, a.host)} · {a.path.rsplit('/', 1)[-1] or '/'}"
+                                     for a in s.network)}
              for s in SKILLS.values()],
             hide_index=True, width="stretch",
         )
-        st.caption("The sandbox policy is generated from these declarations. "
-                   "Files: code is read-only, only data/ is writable.")
+        st.caption("The sandbox policy is generated from these declarations: Python may call POST "
+                   "/v1/chat/completions on Token Factory and POST /search on Tavily, nothing else. "
+                   "Code is read-only and only data/ is writable.")
     with right:
         st.markdown("**One policy line, live**")
         shares = [e for e in log if e.get("skill") == "share_report"][-3:]

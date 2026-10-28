@@ -117,6 +117,10 @@ The policy is generated from the skills themselves. Each skill in [src/jcomit/sk
 
 ## Screenshots
 
+**Run the agent.** A live run on the sample statement: what was hidden, how each transaction was decided, the model calls and tokens used, and a fresh review from Nemotron.
+
+![Run the agent tab](docs/screenshots/run-the-agent.png)
+
 **Money review.** Nemotron's monthly review, the three alerts, spending by category and the subscriptions it found.
 
 ![Money review tab](docs/screenshots/money-review.png)

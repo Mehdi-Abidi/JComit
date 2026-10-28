@@ -44,10 +44,10 @@ def test_live_run_and_teaching_memory(monkeypatch):
     assert not at.exception
     text = " ".join(m.value for m in at.markdown)
     assert "Live review text." in text
-    assert "Nemotron 3 Super sorted 12 shops" in text
+    assert "12 unknown shops sorted by Nemotron 3 Super" in text
 
     at.selectbox[1].set_value("Dining").run()
     at.button(key="remember").click().run()
     at.button(key="run").click().run()
     text = " ".join(m.value for m in at.markdown)
-    assert "1 of them from memory" in text
+    assert "(1 from memory)" in text

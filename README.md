@@ -121,6 +121,10 @@ The policy is generated from the skills themselves. Each skill in [src/jcomit/sk
 
 ![Run the agent tab](docs/screenshots/run-the-agent.png)
 
+**Tavily web lookup.** When Nemotron can't place a shop, the agent searches the redacted shop name with Tavily and asks Nemotron again with the snippet. Here the made-up "SQ *BLUE DOOR LLC" matched an unrelated consultancy, so Nemotron kept it as Other instead of guessing. The user can teach it the right category once.
+
+![Tavily web lookup in a live run](docs/screenshots/tavily.png)
+
 **Money review.** Nemotron's monthly review, the three alerts, spending by category and the subscriptions it found.
 
 ![Money review tab](docs/screenshots/money-review.png)

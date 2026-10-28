@@ -192,7 +192,8 @@ with run_tab:
         ]
         with st.container(border=True):
             for n, s in enumerate(steps, 1):
-                st.markdown(f":green[:material/check:] {n}. {s}")
+                icon = ":gray[:material/remove:]" if "is off" in s else ":green[:material/check:]"
+                st.markdown(f"{icon} {n}. {s}")
             st.caption(f"{res['usage']['calls']} model calls, {res['usage']['tokens']:,} tokens, {res['seconds']} s. "
                        f"Ran at {res['ran_at']}; the same statement reuses its result for an hour.")
         st.caption("This live run uses the agent's own code, outside the sandbox. "
@@ -211,11 +212,14 @@ with run_tab:
             with right:
                 st.markdown("**What Nemotron was sent**")
                 st.dataframe([{"Original": s["original"], "Sent": s["redacted"]} for s in res["sent"]],
-                             hide_index=True, use_container_width=True, height=240)
+                             hide_index=True, width="stretch", height=240)
+                st.caption("Only shop names the rules didn't know, plus the amount. Rows that name people, "
+                           "like Zelle transfers, are sorted by rules and never sent; any that were would "
+                           "go out redacted.")
                 if res["searched"]:
                     st.markdown("**Tavily web lookups**")
                     st.dataframe([{"Searched": s["query"], "Found": s["hint"], "Now": s["category"]}
-                                  for s in res["searched"]], hide_index=True, use_container_width=True)
+                                  for s in res["searched"]], hide_index=True, width="stretch")
 
         st.markdown("**Teach it.** Pick a shop and the category it should be. Run again and those rows "
                     "are decided by memory instead of the model.")
@@ -223,7 +227,7 @@ with run_tab:
         default = shops.index("SQ *BLUE DOOR LLC") if "SQ *BLUE DOOR LLC" in shops else 0
         a, b, c = st.columns([3, 2, 1], vertical_alignment="bottom")
         shop = a.selectbox("Shop", shops, index=default)
-        category = b.selectbox("Category", CATEGORIES)
+        category = b.selectbox("Category", CATEGORIES, index=CATEGORIES.index("Dining"))
         if c.button("Remember", key="remember"):
             taught[shop] = category
             st.success(f"Saved: {shop} is {category}. Press Run again.")
@@ -234,7 +238,7 @@ with run_tab:
             st.dataframe(
                 [{"Date": i["date"], "Shop": i["description"], "Amount": i["amount"],
                   "Category": i["category"], "Decided by": i["source"]} for i in res["items"]],
-                hide_index=True, use_container_width=True,
+                hide_index=True, width="stretch",
                 column_config={"Amount": st.column_config.NumberColumn(format="$%.2f")},
             )
 
@@ -267,14 +271,14 @@ with money_tab:
                     tooltip=["category:N", alt.Tooltip("spent:Q", format="$,.2f")],
                 )
                 .properties(height=26 * len(spend) + 20),
-                use_container_width=True,
+                width="stretch",
             )
         if subs:
             total = -sum(s["amount"] for s in subs)
             st.markdown(esc(f"**Subscriptions** · {money(total)} a month, {money(total * 12)} a year"))
             st.dataframe(
                 [{"Shop": s["merchant"], "Monthly": money(-s["amount"])} for s in subs],
-                hide_index=True, use_container_width=True,
+                hide_index=True, width="stretch",
             )
 
     items = categorized["items"]
@@ -284,7 +288,7 @@ with money_tab:
             st.dataframe(
                 [{"Date": i["date"], "Shop": i["description"], "Amount": i["amount"],
                   "Category": i["category"], "Decided by": i["source"]} for i in items],
-                hide_index=True, use_container_width=True,
+                hide_index=True, width="stretch",
                 column_config={"Amount": st.column_config.NumberColumn(format="$%.2f")},
             )
 
@@ -326,11 +330,11 @@ with privacy_tab:
             st.dataframe(
                 [{"Label": k, "Real value (stays here)": redact.mapping[k]}
                  for k in sorted(redact.mapping, key=label_order)],
-                hide_index=True, use_container_width=True,
+                hide_index=True, width="stretch",
             )
         with b:
             st.markdown("**Rows that mention people or accounts**")
-            st.dataframe(changed, hide_index=True, use_container_width=True)
+            st.dataframe(changed, hide_index=True, width="stretch")
             st.caption("Every row also carries the holder's name, account and card. They are replaced the same way.")
 
     with receipts_tab:
@@ -347,7 +351,7 @@ with privacy_tab:
         st.caption("Rules sort the common shops. Only the ones they don't know go to Nemotron, once each.")
         st.dataframe(
             [{"Original": s["original"], "Sent to Nemotron": s["redacted"]} for s in categorized["sent_to_model"]],
-            hide_index=True, use_container_width=True,
+            hide_index=True, width="stretch",
         )
 
     with try_tab:
@@ -366,7 +370,7 @@ with sandbox_tab:
               "Status": "Approved" if s.approved else "Not approved",
               "Network": ", ".join(f"{a.method} {a.host}{a.path}" for a in s.network)}
              for s in SKILLS.values()],
-            hide_index=True, use_container_width=True,
+            hide_index=True, width="stretch",
         )
         st.caption("The sandbox policy is generated from these declarations. "
                    "Files: code is read-only, only data/ is writable.")
@@ -393,14 +397,14 @@ with sandbox_tab:
             "What": e.get("action") or e.get("target") or "",
             "Why": e.get("reason") or e.get("detail") or (f"policy {e['policy']}" if e.get("policy") else ""),
         } for e in shown],
-        hide_index=True, use_container_width=True,
+        hide_index=True, width="stretch",
         column_config={"Result": st.column_config.TextColumn(width="small"),
                        "Time": st.column_config.TextColumn(width="small")},
     )
 
 st.divider()
 st.caption(
-    ("Live results from this machine." if live else
-     "Results are a snapshot of a real run inside the NVIDIA OpenShell sandbox.")
+    ("Money review, Privacy and Sandbox show live results from this machine." if live else
+     "Money review, Privacy and Sandbox show a recorded run inside the NVIDIA OpenShell sandbox.")
     + " Source: [github.com/Mehdi-Abidi/JComit](https://github.com/Mehdi-Abidi/JComit)"
 )

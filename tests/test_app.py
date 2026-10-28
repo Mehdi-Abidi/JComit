@@ -1,5 +1,6 @@
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -18,7 +19,9 @@ def test_page_renders_demo_snapshot(monkeypatch):
     text = " ".join(m.value for m in at.markdown)
     assert "Nemotron's review" in text
     assert all(label in text for label in ("Very large charge", "Charged twice", "New shop abroad"))
-    assert [m.value for m in at.metric][2:] == ["3", "4"]
+    log = json.loads((Path(__file__).resolve().parent.parent / "demo" / "action_log.json").read_text())
+    stopped = sum(1 for e in log if e["result"] in ("denied", "blocked"))
+    assert [m.value for m in at.metric][2:] == ["3", str(stopped)]
     assert at.button(key="run").disabled
     tried = at.code[-1].value
     assert "[NAME_" in tried and "[ACCT_" in tried and "[CARD_" in tried

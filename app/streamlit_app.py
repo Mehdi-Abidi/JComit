@@ -186,8 +186,12 @@ with run_tab:
             + (f", {d['memory']} of them from memory." if d.get("memory") else "."),
             "Leak guard checked every request before it left: " + ("blocked." if res["blocked"] else "passed."),
             f"Nemotron 3 Super sorted {len(res['sent'])} shops the rules didn't know, in one request.",
-            (f"Tavily looked up {looked} shop name{'s' if looked != 1 else ''} Nemotron couldn't place."
-             if res["web"] else "Tavily lookup is off on this copy of the page."),
+            (f"Tavily looked up {looked} shop name{'s' if looked != 1 else ''} Nemotron couldn't place; "
+             f"{d.get('nemotron+web', 0)} row{'s' if d.get('nemotron+web', 0) != 1 else ''} changed category, "
+             f"the rest stayed Other where the web results weren't clear."
+             if res["web"] and looked else
+             "No shops needed a Tavily web lookup this time." if res["web"] else
+             "Tavily lookup is off on this copy of the page."),
             "Nemotron wrote the monthly review from totals only." if res["review"] else "No review: the run was blocked.",
         ]
         with st.container(border=True):

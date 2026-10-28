@@ -112,11 +112,17 @@ The policy is generated from the skills themselves. Each skill in [src/jcomit/sk
 
 ## Screenshots
 
-Money review: TBA
+**Money review.** Nemotron's monthly review, the three alerts, spending by category and the subscriptions it found.
 
-Privacy: TBA
+![Money review tab](docs/screenshots/money-review.png)
 
-Sandbox: TBA
+**Privacy.** Each private value and the label that replaces it, and the statement rows that mention other people.
+
+![Privacy tab](docs/screenshots/privacy.png)
+
+**Sandbox.** What each skill may reach, the same upload blocked, allowed and blocked again, and the action log.
+
+![Sandbox tab](docs/screenshots/sandbox.png)
 
 ## Run it
 

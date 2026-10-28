@@ -180,15 +180,16 @@ with run_tab:
         d = res["decided_by"]
         local = d.get("rule", 0) + d.get("memory", 0)
         looked = len(res["searched"])
+        placed = sum(1 for s in res["searched"] if s["category"] != "Other")
         steps = [
             f"Hid {res['hidden']} private values (names, account and card numbers, contact details) behind labels.",
             f"Rules and your saved corrections sorted {local} of {res['rows']} transactions"
             + (f", {d['memory']} of them from memory." if d.get("memory") else "."),
             "Leak guard checked every request before it left: " + ("blocked." if res["blocked"] else "passed."),
             f"Nemotron 3 Super sorted {len(res['sent'])} shops the rules didn't know, in one request.",
-            (f"Tavily looked up {looked} shop name{'s' if looked != 1 else ''} Nemotron couldn't place; "
-             f"{d.get('nemotron+web', 0)} row{'s' if d.get('nemotron+web', 0) != 1 else ''} changed category, "
-             f"the rest stayed Other where the web results weren't clear."
+            (f"Tavily looked up {looked} shop name{'s' if looked != 1 else ''} Nemotron couldn't place: "
+             f"{placed} now {'has' if placed == 1 else 'have'} a category"
+             + (f", {looked - placed} stayed Other because the web results weren't clear." if looked - placed else ".")
              if res["web"] and looked else
              "No shops needed a Tavily web lookup this time." if res["web"] else
              "Tavily lookup is off on this copy of the page."),
@@ -222,7 +223,8 @@ with run_tab:
                            "go out redacted.")
                 if res["searched"]:
                     st.markdown("**Tavily web lookups**")
-                    st.dataframe([{"Searched": s["query"], "Found": s["hint"], "Now": s["category"]}
+                    st.dataframe([{"Searched": s["query"], "Now": s["category"],
+                                   "Found": s["hint"][:90] + ("..." if len(s["hint"]) > 90 else "")}
                                   for s in res["searched"]], hide_index=True, width="stretch")
 
         st.markdown("**Teach it.** Pick a shop and the category it should be. Run again and those rows "

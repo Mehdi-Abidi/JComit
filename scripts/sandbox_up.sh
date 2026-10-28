@@ -11,6 +11,10 @@ export PATH="$HOME/.local/bin:$PATH"
 cd "$(dirname "$0")/.."
 
 bash openshell/start-gateway.sh
+for _ in $(seq 1 30); do
+  openshell provider list >/dev/null 2>&1 && break
+  sleep 2
+done
 
 ctx="$(mktemp -d)"
 cp -r src "$ctx/src"

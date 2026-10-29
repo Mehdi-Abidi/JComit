@@ -37,8 +37,8 @@ _LAST4 = re.compile(r"(?i)\b((?:card(?:\s+ending)?(?:\s+in)?|ending(?:\s+in)?|la
 _MASKED = re.compile(r"(?i)((?:x{2,}|\*{2,})[\s-]?)(\d{4})\b")
 _NAME_CUE = re.compile(
     r"(?i)\b((?:(?:zelle|venmo|cash\s*app|paypal)(?:\s+payment)?(?:\s+(?:to|from))?"
-    r"|(?:payment|paid|sent)\s+(?:to|from)|dear)[\s*]+|(?:customer|name):\s*)"
-    r"(?!(?:savings|checking|acct|account|landlord|to|from|payment)\b)"
+    r"|payment(?:\s+(?:to|from))?|(?:paid|sent)\s+(?:to|from)|dear|(?:dr|mr|mrs|ms|miss)\.?)[\s*]+|(?:customer|name):\s*)"
+    r"(?!(?:savings|checking|acct|account|landlord|to|from|payment|thank|thanks|received|online|autopay|due)\b)"
     # up to 4 words (first, middle, last, Jr); a reference word or a number ends the name
     rf"({_WORD}(?:\s+(?!(?:ref|for|on|memo|conf|id|to|from|via|payment)\b){_WORD}){{0,3}})"
 )

@@ -238,3 +238,17 @@ def test_email_with_the_holders_name_is_hidden_whole(email):
     assert out.endswith("Email: [EMAIL_1]")
     assert "@" not in out
     assert r.mapping["[EMAIL_1]"] == email
+
+
+@pytest.mark.parametrize("text, leaked", [
+    ("PAYMENT MARIA GARCIA", "GARCIA"),
+    ("SQ *DR JOHN SMITH DDS", "SMITH"),
+    ("MR. HASSAN RENT", "HASSAN"),
+])
+def test_payment_and_title_cues_hide_the_name(text, leaked):
+    assert leaked not in Redactor().redact(text)
+
+
+@pytest.mark.parametrize("text", ["PAYMENT THANK YOU", "ONLINE PAYMENT RECEIVED", "AUTOPAYMENT DUE"])
+def test_card_payment_lines_survive(text):
+    assert Redactor().redact(text) == text

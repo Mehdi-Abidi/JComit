@@ -149,6 +149,9 @@ def review_month(txns, items, month: str, ask=None) -> dict:
 
 def run_monthly_review(args, ask=None) -> dict:
     txns = _load(args.files)
+    if not txns:
+        log_action("monthly_review", "no transactions, nothing to review", "skipped")
+        return {"month": args.month, "review": "No transactions in the statement, so there is nothing to review."}
     month = args.month or max(t.date for t in txns).strftime("%Y-%m")
     result = categorize(txns, memory=Memory(data_dir() / "memory.db"), redact=default_redactor(txns),
                         lookup=_lookup())

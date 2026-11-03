@@ -53,6 +53,20 @@ def test_monthly_review_sends_only_totals(data, monkeypatch):
     assert (data / "review_latest.json").exists()
 
 
+@pytest.mark.parametrize("month", [None, "2026-09"])
+def test_monthly_review_header_only_csv_does_not_crash(data, month):
+    (data / "statement.csv").write_text(STATEMENT.splitlines()[0] + "\n", encoding="utf-8")
+
+    def ask(prompt, system=None):
+        raise AssertionError("model must not be called for an empty statement")
+
+    out = skills.run_monthly_review(argparse.Namespace(files=[], month=month), ask=ask)
+    assert out["month"] == month
+    assert "no transactions" in out["review"].lower()
+    assert not (data / "review_latest.json").exists()
+    assert actions(data)[-1]["result"] == "skipped"
+
+
 def test_share_report_reports_a_sandbox_block(data, monkeypatch):
     def blocked(*a, **k):
         raise urllib.error.URLError("Tunnel connection failed: 403 Forbidden")
